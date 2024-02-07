@@ -97,8 +97,6 @@ class SmartInput {
             return;
         }
 
-        console.log(this.input.selectionStart);
-
         if (this.input.selectionStart == this.input.selectionEnd) {
             if (this.input.selectionStart >= this.selection.day.start && this.input.selectionStart <= this.selection.day.end) {
                 this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);

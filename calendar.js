@@ -1,60 +1,51 @@
 class CalendarInput {
     /**
-     * Date d'aujourd'hui, normalement fixe
-     * @type {Date}
-     */
-    todayDate;
-
-
-    /**
-     * @type {HTMLDivElement}
-     */
-    mainSelector;
-
-
-    /**
-     * @type {HTMLInputElement}
-     */
-    inputTxtCalendar
-
-
-    /**
-     * Date sélectionnée par l'input ou l'utilisateur
-     * @type {Date}
-     */
-    selectedDate;
-
-    /**
-     * Le calendrier sélectionné quand l'on change de mois/année sans toucher à selectedDate
-     * @type {Date}
-     */
-    selectedCalendar
-
-
-    /**
      * 
      * @param {HTMLDivElement} mainSelector 
      */
     constructor(mainSelector) {
-        this.minYearSelectable = null;
-        this.maxYearSelectable = null;
+        this.separator = "/";
+
+        /**
+         * Date d'aujourd'hui, normalement fixe
+         * @type {Date}
+         */
         this.todayDate = new Date();
+
+        /**
+         * @type {HTMLDivElement}
+         */
         this.mainSelector = mainSelector;
         this.mainSelector.setAttribute("data-active", "false");
+
+        /**
+         * @type {HTMLInputElement}
+         */
         this.inputTxtCalendar = mainSelector.querySelector("input");
+
+
+        /**
+         * Date sélectionnée par l'input ou l'utilisateur
+         * @type {Date}
+         */
         this.selectedDate = this.checkIfDateFromInputIsValid() ? this.getDateFromInput() : new Date();
-
-        this.minYearSelectable = this.selectedDate.getFullYear() - 1;
-        this.maxYearSelectable = this.selectedDate.getFullYear() + 6;
-
         this.setDateInInput();
+        this.minYearSelectable = 1900;
+        this.maxYearSelectable = this.todayDate.getFullYear() + 1;
+
+        /**
+         * Le calendrier sélectionné quand l'on change de mois/année sans toucher à selectedDate
+         * @type {Date}
+         */
         this.selectedCalendar = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), 1);
+
         this.createBaseCalendar();
         this.addEventListenerToSelects();
         this.addEventListenerToButtonsInsideCalendar();
         this.addEventListenerToButtonToggle();
         this.addEventListenerToInput();
         this.updateCalendarAndSetNewMonth();
+
     }
 
     /**
@@ -71,16 +62,16 @@ class CalendarInput {
             return false
         }
 
-        let year = parseInt(inputWithoutSeparator.substring(0, 4));
-        let month = parseInt(inputWithoutSeparator.substring(4, 6));
-        let day = parseInt(inputWithoutSeparator.substring(6, 8));
+        let year = parseInt(inputWithoutSeparator.substring(4, 10));
+        let month = parseInt(inputWithoutSeparator.substring(2, 4));
+        let day = parseInt(inputWithoutSeparator.substring(0, 2));
 
         if (isNaN(year) || isNaN(month) || isNaN(day)) {
             return false
         }
 
-        if(this.minYearSelectable != null && this.maxYearSelectable != null){
-            if(year < this.minYearSelectable || year >= this.maxYearSelectable){
+        if (this.minYearSelectable != null && this.maxYearSelectable != null) {
+            if (year < this.minYearSelectable || year >= this.maxYearSelectable) {
                 return false;
             }
         }
@@ -88,8 +79,8 @@ class CalendarInput {
         return this.isDateValid(year, month, day);
     }
 
-    isDateValid(year, month, day){
-        month = month-1;
+    isDateValid(year, month, day) {
+        month = month - 1;
         if ([0, 2, 4, 6, 7, 9, 11].includes(month) && day <= 31) {
             return true;
         }
@@ -102,7 +93,7 @@ class CalendarInput {
             return true;
         }
 
-        if(month == 1 && day <= 28){
+        if (month == 1 && day <= 28) {
             return true;
         }
 
@@ -112,29 +103,29 @@ class CalendarInput {
 
     getDateFromInput() {
         let inputWithoutSeparator = this.removeSeparatorsFromInput();
-        let year = parseInt(inputWithoutSeparator.substring(0, 4));
-        let month = parseInt(inputWithoutSeparator.substring(4, 6));
-        let day = parseInt(inputWithoutSeparator.substring(6, 8));
+        let year = parseInt(inputWithoutSeparator.substring(4, 10));
+        let month = parseInt(inputWithoutSeparator.substring(2, 4));
+        let day = parseInt(inputWithoutSeparator.substring(0, 2));
 
         return new Date(year, month - 1, day);
     }
 
     /**
-     * Formate la date yyyy/mm/dd dans l'input
+     * Formate la date dd mm yyyy dans l'input
      */
     setDateInInput() {
         let month = this.selectedDate.getMonth() + 1;
         let day = this.selectedDate.getDate();
-        this.inputTxtCalendar.value = this.selectedDate.getFullYear().toString() + "/" + (month < 10 ? "0" + month : month).toString() + "/" + (day < 10 ? "0" + day : day).toString()
+        this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separator}${(month < 10 ? "0" + month : month).toString()}${this.separator}${this.selectedDate.getFullYear().toString()}`;
     }
 
-    setSelectedDate(year, month, day){
+    setSelectedDate(year, month, day) {
         this.selectedDate.setFullYear(year);
         this.selectedDate.setMonth(month);
         this.selectedDate.setDate(day);
     }
 
-    setSelectedDateFromInput(){
+    setSelectedDateFromInput() {
         this.selectedDate = this.getDateFromInput();
     }
 
@@ -170,6 +161,7 @@ class CalendarInput {
 
     createSelectMonthYear() {
         let tr = document.createElement("tr")
+        tr.classList.add("month_year_container")
         let td = document.createElement("td");
         td.classList.add("month_year");
         td.setAttribute("colspan", 7);
@@ -182,11 +174,11 @@ class CalendarInput {
         let divNext = document.createElement("div");
         divPrev.classList.add("prev");
         divNext.classList.add("next");
-        divPrev.appendChild(this.createButtonMonthYear("prev_year", "<<"));
-        divPrev.appendChild(this.createButtonMonthYear("prev_month", "<"));
+        divPrev.appendChild(this.createButtonMonthYear("prev_year", `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M493.6 445c-11.2 5.3-24.5 3.6-34.1-4.4L288 297.7V416c0 12.4-7.2 23.7-18.4 29s-24.5 3.6-34.1-4.4L64 297.7V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V96C0 78.3 14.3 64 32 64s32 14.3 32 32V214.3L235.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S288 83.6 288 96V214.3L459.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S512 83.6 512 96V416c0 12.4-7.2 23.7-18.4 29z"/></svg>`));
+        divPrev.appendChild(this.createButtonMonthYear("prev_month", `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>`));
 
-        divNext.appendChild(this.createButtonMonthYear("next_month", ">"));
-        divNext.appendChild(this.createButtonMonthYear("next_year", ">>"));
+        divNext.appendChild(this.createButtonMonthYear("next_month", `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>`));
+        divNext.appendChild(this.createButtonMonthYear("next_year", `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M18.4 445c11.2 5.3 24.5 3.6 34.1-4.4L224 297.7V416c0 12.4 7.2 23.7 18.4 29s24.5 3.6 34.1-4.4L448 297.7V416c0 17.7 14.3 32 32 32s32-14.3 32-32V96c0-17.7-14.3-32-32-32s-32 14.3-32 32V214.3L276.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S224 83.6 224 96V214.3L52.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S0 83.6 0 96V416c0 12.4 7.2 23.7 18.4 29z"/></svg>    `));
 
         divContainer.appendChild(divPrev);
         divContainer.appendChild(divNext);
@@ -203,7 +195,7 @@ class CalendarInput {
         divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate("Revenir à aujourd'hui", () => {
             this.selectedCalendar.setFullYear(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate());
         }));
-        
+
         divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate("Revenir à la date sélectionnée", () => {
             this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
         }));
@@ -215,7 +207,7 @@ class CalendarInput {
     }
 
 
-    createButtonTodaySelectedDate(innerText, functionEvent){
+    createButtonTodaySelectedDate(innerText, functionEvent) {
         let button = document.createElement("button");
         button.innerText = innerText;
         button.addEventListener("click", (e) => {
@@ -236,7 +228,7 @@ class CalendarInput {
     createButtonMonthYear(className, inner) {
         let button = document.createElement("button");
         button.classList.add(className);
-        button.innerText = inner;
+        button.innerHTML = inner;
 
         return button;
     }
@@ -324,19 +316,19 @@ class CalendarInput {
         });
     }
 
-    addEventListenerToButtonToggle(){
+    addEventListenerToButtonToggle() {
         let calendar = this.mainSelector.querySelector(".calendar");
-        if(calendar == null){
+        if (calendar == null) {
             window.alert("calendar null");
             return;
         }
 
         this.mainSelector.querySelector("#toggle_button").addEventListener("click", (e) => {
             e.preventDefault();
-            if(calendar.style.display == "none"){
+            if (calendar.style.display == "none") {
                 calendar.style.display = "block";
                 this.mainSelector.setAttribute("data-active", "true");
-            }else{
+            } else {
                 calendar.style.display = "none";
                 this.mainSelector.setAttribute("data-active", "false");
             }
@@ -369,17 +361,17 @@ class CalendarInput {
         });
     }
 
-    addEventListenerToInput(){
+    addEventListenerToInput() {
         let idTimeout = null;
         this.inputTxtCalendar.addEventListener("input", (e) => {
-            if(this.checkIfDateFromInputIsValid()){
+            if (this.checkIfDateFromInputIsValid()) {
                 clearTimeout(idTimeout);
                 this.setSelectedDateFromInput();
                 this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
                 this.updateCalendarAndSetNewMonth();
                 this.updateSelectYearMonth();
 
-                setTimeout(() => {
+                idTimeout = setTimeout(() => {
                     this.setDateInInput();
                 }, 500);
             }
@@ -418,7 +410,7 @@ class CalendarInput {
         this.updateSelectYearMonth();
     }
 
-    updateSelectYearMonth(){
+    updateSelectYearMonth() {
         this.mainSelector.querySelector('#select_month option[value="' + this.selectedCalendar.getMonth() + '"]').selected = true;
         this.mainSelector.querySelector('#select_year option[value="' + this.selectedCalendar.getFullYear() + '"]').selected = true;
     }
@@ -525,7 +517,7 @@ class CalendarInput {
         //Les mois n'ont pas le même nombre de "ligne"
         //Cette fonction n'est là que pour être purement esthétique pour éviter
         //que le calendrier ne change de hauteur.
-        while(nbrRows < 6){
+        while (nbrRows < 6) {
             this.createAdditionnalEmptyRow(table);
             nbrRows++;
         }
@@ -558,7 +550,7 @@ class CalendarInput {
         return year == this.selectedDate.getFullYear() && month == this.selectedDate.getMonth() && day == this.selectedDate.getDate();
     }
 
-    isToday(year, month, day){
+    isToday(year, month, day) {
         return year == this.todayDate.getFullYear() && month == this.todayDate.getMonth() && day == this.todayDate.getDate();
     }
 
@@ -574,15 +566,15 @@ document.querySelectorAll(".calendar_input")?.forEach((calendar) => {
 let oldCalendarActive = null;
 window.addEventListener("click", (e) => {
     let target = e.target.closest(".calendar_input[data-active=true]");
-    
 
-        if(oldCalendarActive == null){
-            oldCalendarActive = target;
-        }
 
-        if(target != oldCalendarActive){
-            oldCalendarActive.setAttribute("data-active", "false");
-            oldCalendarActive.querySelector(".calendar").style.display = "none";
-            oldCalendarActive = target;
-        }
+    if (oldCalendarActive == null) {
+        oldCalendarActive = target;
+    }
+
+    if (target != oldCalendarActive) {
+        oldCalendarActive.setAttribute("data-active", "false");
+        oldCalendarActive.querySelector(".calendar").style.display = "none";
+        oldCalendarActive = target;
+    }
 });
