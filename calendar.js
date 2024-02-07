@@ -56,7 +56,6 @@ class CalendarInput {
         this.addEventListenerToSelects();
         this.addEventListenerToButtonsInsideCalendar();
         this.addEventListenerToButtonToggle();
-        // this.addEventListenerToInput();
         this.updateCalendarAndSetNewMonth();
 
     }
@@ -382,7 +381,7 @@ class CalendarInput {
 
                 this.inputTxtCalendar.addEventListener("animationend", () => {this.inputTxtCalendar.classList.remove("animate")}, {once: true});
             }
-            // }
+
             if (this.checkIfDateFromInputIsValid()) {
                 this.setSelectedDateFromInput();
                 this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
@@ -391,24 +390,6 @@ class CalendarInput {
                 this.inputTxtCalendar.classList.remove("invalid");
             }
         }
-    }
-
-    addEventListenerToInput() {
-        let idTimeout = null;
-        this.inputTxtCalendar.addEventListener("input", (e) => {
-            if (this.checkIfDateFromInputIsValid()) {
-                console.log("valid");
-                // clearTimeout(idTimeout);
-                // this.setSelectedDateFromInput();
-                // this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
-                // this.updateCalendarAndSetNewMonth();
-                // this.updateSelectYearMonth();
-
-                // idTimeout = setTimeout(() => {
-                //     this.setDateInInput();
-                // }, 500);
-            }
-        });
     }
 
     prevOrNextMonthOrYear(step, target) {
@@ -562,6 +543,7 @@ class CalendarInput {
 
         button.addEventListener("click", (e) => {
             e.preventDefault();
+            this.inputTxtCalendar.classList.remove("invalid");
             this.mainSelector.querySelector(".selected_date")?.classList.remove("selected_date");
             button.parentElement.classList.add("selected_date");
             this.setSelectedDate(year, month, counterDay);
