@@ -1,35 +1,48 @@
+import { SmartInput } from "./SmartInput.js";
+
 class CalendarInput {
     /**
-     * 
      * @param {HTMLDivElement} mainSelector 
+     * @param {string} dayPlaceHolder 
+     * @param {string} monthPlaceHolder 
+     * @param {string} yearPlaceHolder 
+     * @param {string} separatorPlaceHolder 
      */
-    constructor(mainSelector) {
-        this.separator = "/";
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder) {
+        this.dayPlaceHolder = dayPlaceHolder;
+        this.monthPlaceHolder = monthPlaceHolder;
+        this.yearPlaceHolder = yearPlaceHolder;
+        this.separatorPlaceHolder = separatorPlaceHolder;
 
+        
         /**
          * Date d'aujourd'hui, normalement fixe
          * @type {Date}
-         */
-        this.todayDate = new Date();
-
-        /**
-         * @type {HTMLDivElement}
-         */
-        this.mainSelector = mainSelector;
-        this.mainSelector.setAttribute("data-active", "false");
-
-        /**
-         * @type {HTMLInputElement}
-         */
-        this.inputTxtCalendar = mainSelector.querySelector("input");
-
+        */
+       this.todayDate = new Date();
+       
+       /**
+        * @type {HTMLDivElement}
+       */
+      this.mainSelector = mainSelector;
+      this.mainSelector.setAttribute("data-active", "false");
+      
+      /**
+       * @type {HTMLInputElement}
+      */
+     this.inputTxtCalendar = mainSelector.querySelector("input");
+     this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar());
 
         /**
          * Date sélectionnée par l'input ou l'utilisateur
          * @type {Date}
          */
         this.selectedDate = this.checkIfDateFromInputIsValid() ? this.getDateFromInput() : new Date();
-        this.setDateInInput();
+
+        if(this.checkIfDateFromInputIsValid()){
+            this.setDateInInput();
+        }
+
         this.minYearSelectable = 1900;
         this.maxYearSelectable = this.todayDate.getFullYear() + 1;
 
@@ -43,7 +56,7 @@ class CalendarInput {
         this.addEventListenerToSelects();
         this.addEventListenerToButtonsInsideCalendar();
         this.addEventListenerToButtonToggle();
-        this.addEventListenerToInput();
+        // this.addEventListenerToInput();
         this.updateCalendarAndSetNewMonth();
 
     }
@@ -116,7 +129,7 @@ class CalendarInput {
     setDateInInput() {
         let month = this.selectedDate.getMonth() + 1;
         let day = this.selectedDate.getDate();
-        this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separator}${(month < 10 ? "0" + month : month).toString()}${this.separator}${this.selectedDate.getFullYear().toString()}`;
+        this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separatorPlaceHolder}${(month < 10 ? "0" + month : month).toString()}${this.separatorPlaceHolder}${this.selectedDate.getFullYear().toString()}`;
     }
 
     setSelectedDate(year, month, day) {
@@ -361,19 +374,39 @@ class CalendarInput {
         });
     }
 
-    addEventListenerToInput() {
-        let idTimeout = null;
-        this.inputTxtCalendar.addEventListener("input", (e) => {
+    callBackUpdateCalendar(){
+        return () => {
+            if(!this.checkIfDateFromInputIsValid() && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(this.inputTxtCalendar.value)){
+                this.inputTxtCalendar.classList.add("invalid");
+                this.inputTxtCalendar.classList.add("animate");
+
+                this.inputTxtCalendar.addEventListener("animationend", () => {this.inputTxtCalendar.classList.remove("animate")}, {once: true});
+            }
+            // }
             if (this.checkIfDateFromInputIsValid()) {
-                clearTimeout(idTimeout);
                 this.setSelectedDateFromInput();
                 this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
                 this.updateCalendarAndSetNewMonth();
                 this.updateSelectYearMonth();
+                this.inputTxtCalendar.classList.remove("invalid");
+            }
+        }
+    }
 
-                idTimeout = setTimeout(() => {
-                    this.setDateInInput();
-                }, 500);
+    addEventListenerToInput() {
+        let idTimeout = null;
+        this.inputTxtCalendar.addEventListener("input", (e) => {
+            if (this.checkIfDateFromInputIsValid()) {
+                console.log("valid");
+                // clearTimeout(idTimeout);
+                // this.setSelectedDateFromInput();
+                // this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
+                // this.updateCalendarAndSetNewMonth();
+                // this.updateSelectYearMonth();
+
+                // idTimeout = setTimeout(() => {
+                //     this.setDateInInput();
+                // }, 500);
             }
         });
     }
@@ -560,7 +593,7 @@ class CalendarInput {
 let calendarsArray = new Array();
 
 document.querySelectorAll(".calendar_input")?.forEach((calendar) => {
-    calendarsArray.push(new CalendarInput(calendar));
+    calendarsArray.push(new CalendarInput(calendar, "jj", "mm", "aaaa", "/"));
 });
 
 let oldCalendarActive = null;
