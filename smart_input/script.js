@@ -44,8 +44,8 @@ class SmartInput {
         this.input.addEventListener("keydown", this.onInput.bind(this));
         this.input.addEventListener("click", this.onClick.bind(this));
         this.input.addEventListener("select", (e) => {
-            // console.log(this.input.selectionStart);
-            // console.log(this.input.selectionEnd);
+            console.log(this.input.selectionStart);
+            console.log(this.input.selectionEnd);
         })
     }
 
@@ -53,12 +53,11 @@ class SmartInput {
     onInput(event) {
         event.preventDefault();
         let key = event.key || String.fromCharCode(event.charCode)
-        if (e.key == "Backspace" || e.key == "Delete") {
+        if (key == "Backspace" || key == "Delete") {
             this.clearDate();
         }
-        // return;
 
-        if (e.key == "ArrowRight") {
+        if (key == "ArrowRight") {
             if (this.input.selectionStart == this.selection.day.start) {
                 this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
             }
@@ -67,7 +66,7 @@ class SmartInput {
             }
         }
 
-        if (e.key == "ArrowLeft") {
+        if (key == "ArrowLeft") {
             if (this.input.selectionStart == this.selection.year.start) {
                 this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
             }
@@ -76,15 +75,15 @@ class SmartInput {
             }
         }
 
-        if (/^\d$/.test(e.key)) {
+        if (/^\d$/.test(key)) {
             if (this.input.selectionStart == this.selection.day.start) {
-                this.inputOnDay(e);
+                this.inputOnDay(key);
             }
             else if (this.input.selectionStart == this.selection.month.start) {
-                this.inputOnMonth(e);
+                this.inputOnMonth(key);
             }
             else if (this.input.selectionStart == this.selection.year.start) {
-                this.inputOnYear(e);
+                this.inputOnYear(key);
             }
         }
 
@@ -98,11 +97,13 @@ class SmartInput {
             return;
         }
 
+        console.log(this.input.selectionStart);
+
         if (this.input.selectionStart == this.input.selectionEnd) {
-            if (this.input.selectionStart >= this.selection.day.start && this.input.selectionStart < this.selection.day.end) {
+            if (this.input.selectionStart >= this.selection.day.start && this.input.selectionStart <= this.selection.day.end) {
                 this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
             }
-            else if (this.input.selectionStart >= this.selection.month.start && this.input.selectionStart < this.selection.month.end) {
+            else if (this.input.selectionStart >= this.selection.month.start && this.input.selectionStart <= this.selection.month.end) {
                 this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
             }
             else if (this.input.selectionStart >= this.selection.year.start && this.input.selectionStart < this.selection.year.end) {
@@ -111,23 +112,23 @@ class SmartInput {
         }
     }
 
-    inputOnDay(e) {
+    inputOnDay(key) {
         if (this.counterInputDay == RESET_COUNTER) {
             this.counterInputDay = 0;
             this.selectedDay = "";
         }
 
-        let parsedDay = parseInt(e.key);
+        let parsedDay = parseInt(key);
 
         if (isNaN(parsedDay)) {
             throw new Error("Day is NaN");
         }
 
         if (parsedDay > 3 && this.selectedDay == "") {
-            this.selectedDay = "0" + e.key;
+            this.selectedDay = "0" + key;
             this.counterInputDay = 10;
         } else {
-            parsedDay = parseInt(this.selectedDay + e.key);
+            parsedDay = parseInt(this.selectedDay + key);
 
             if (isNaN(parsedDay)) {
                 throw new Error("Day is NaN");
@@ -138,7 +139,7 @@ class SmartInput {
             }
 
             this.counterInputDay++;
-            this.selectedDay = this.selectedDay + e.key;
+            this.selectedDay = this.selectedDay + key;
         }
 
         this.updateValueInInput();
@@ -151,24 +152,24 @@ class SmartInput {
         this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
     }
 
-    inputOnMonth(e) {
+    inputOnMonth(key) {
         if (this.counterInputMonth == RESET_COUNTER) {
             this.counterInputMonth = 0;
             this.selectedMonth = "";
         }
 
-        let parsedMonth = parseInt(e.key);
+        let parsedMonth = parseInt(key);
 
         if (isNaN(parsedMonth)) {
             throw new Error("Month is NaN");
         }
 
         if (parsedMonth > 1 && this.selectedMonth == "") {
-            this.selectedMonth = "0" + e.key;
+            this.selectedMonth = "0" + key;
             this.counterInputMonth = 10;
         } else {
 
-            parsedMonth = parseInt(this.selectedMonth + e.key);
+            parsedMonth = parseInt(this.selectedMonth + key);
 
             if (isNaN(parsedMonth)) {
                 throw new Error("Month is NaN");
@@ -178,7 +179,7 @@ class SmartInput {
                 return;
             }
 
-            this.selectedMonth = this.selectedMonth + e.key;
+            this.selectedMonth = this.selectedMonth + key;
             this.counterInputMonth++;
         }
 
@@ -192,13 +193,13 @@ class SmartInput {
         this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
     }
 
-    inputOnYear(e) {
+    inputOnYear(key) {
         if (this.counterInputYear == RESET_COUNTER) {
             this.counterInputYear = 0;
             this.selectedYear = "";
         }
 
-        this.selectedYear = this.selectedYear + e.key;
+        this.selectedYear = this.selectedYear + key;
 
         this.updateValueInInput();
         this.counterInputYear++;
