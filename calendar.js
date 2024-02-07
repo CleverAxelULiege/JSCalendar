@@ -58,6 +58,13 @@ class CalendarInput {
         this.addEventListenerToSelects();
         this.addEventListenerToButtonsInsideCalendar();
         this.addEventListenerToButtonToggle();
+
+        this.inputTxtCalendar.addEventListener("blur", () => {
+            if(!this.checkIfDateFromInputIsValid()){
+                this.invalidDate();
+            }
+        });
+
         this.updateCalendarAndSetNewMonth();
 
     }
@@ -85,9 +92,6 @@ class CalendarInput {
         }
 
         if (this.minYearSelectable != null && this.maxYearSelectable != null) {
-            console.log(this.minYearSelectable);
-            console.log(this.maxYearSelectable);
-            console.log(year);
             if (year < this.minYearSelectable || year > this.maxYearSelectable) {
                 return false;
             }
@@ -114,7 +118,6 @@ class CalendarInput {
             return true;
         }
 
-        // return 28;
         return false;
     }
 
@@ -379,14 +382,18 @@ class CalendarInput {
         });
     }
 
+    invalidDate(){
+        this.inputTxtCalendar.classList.add("invalid");
+        this.inputTxtCalendar.classList.add("animate");
+
+        this.inputTxtCalendar.addEventListener("animationend", () => {this.inputTxtCalendar.classList.remove("animate")}, {once: true});
+    }
+
     callBackUpdateCalendar(){
         return () => {
             console.log(this.checkIfDateFromInputIsValid());
             if(!this.checkIfDateFromInputIsValid() && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(this.inputTxtCalendar.value)){
-                this.inputTxtCalendar.classList.add("invalid");
-                this.inputTxtCalendar.classList.add("animate");
-
-                this.inputTxtCalendar.addEventListener("animationend", () => {this.inputTxtCalendar.classList.remove("animate")}, {once: true});
+                this.invalidDate();
             }
 
             if (this.checkIfDateFromInputIsValid()) {

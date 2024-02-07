@@ -63,8 +63,12 @@ export class SmartInput {
 
     /** @param {KeyboardEvent} event  */
     onInput(event) {
-        event.preventDefault();
-        let key = event.key || String.fromCharCode(event.charCode)
+        let key = event.key || String.fromCharCode(event.charCode);
+
+        if(key != "Tab"){
+            event.preventDefault();
+        }
+        
         if (key == "Backspace" || key == "Delete") {
             this.clearDate();
         }
