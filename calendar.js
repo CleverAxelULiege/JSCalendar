@@ -43,8 +43,10 @@ class CalendarInput {
             this.setDateInInput();
         }
 
-        this.minYearSelectable = 1900;
-        this.maxYearSelectable = this.todayDate.getFullYear() + 1;
+        this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
+
+        this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
+        
 
         /**
          * Le calendrier sélectionné quand l'on change de mois/année sans toucher à selectedDate
@@ -83,7 +85,10 @@ class CalendarInput {
         }
 
         if (this.minYearSelectable != null && this.maxYearSelectable != null) {
-            if (year < this.minYearSelectable || year >= this.maxYearSelectable) {
+            console.log(this.minYearSelectable);
+            console.log(this.maxYearSelectable);
+            console.log(year);
+            if (year < this.minYearSelectable || year > this.maxYearSelectable) {
                 return false;
             }
         }
@@ -249,7 +254,7 @@ class CalendarInput {
         let selectYear = document.createElement("select");
         selectYear.setAttribute("id", "select_year");
 
-        for (let i = startYear; i < endYear; i++) {
+        for (let i = startYear; i <= endYear; i++) {
             let option = document.createElement("option");
             option.value = i.toString();
             option.textContent = i;
@@ -348,26 +353,27 @@ class CalendarInput {
     }
 
     addEventListenerToButtonsInsideCalendar() {
-        this.mainSelector.querySelector(".prev_year")?.addEventListener("click", (e) => {
+        this.mainSelector.querySelector(".prev_year").addEventListener("click", (e) => {
             e.preventDefault();
             this.prevOrNextMonthOrYear(-1, "year");
             this.updateCalendarAndSetNewMonth();
         });
 
-        this.mainSelector.querySelector(".next_year")?.addEventListener("click", (e) => {
+        this.mainSelector.querySelector(".next_year").addEventListener("click", (e) => {
             e.preventDefault();
             this.prevOrNextMonthOrYear(1, "year");
             this.updateCalendarAndSetNewMonth();
         });
 
-        this.mainSelector.querySelector(".prev_month")?.addEventListener("click", (e) => {
+        this.mainSelector.querySelector(".prev_month").addEventListener("click", (e) => {
             e.preventDefault();
             this.prevOrNextMonthOrYear(-1, "month");
             this.updateCalendarAndSetNewMonth();
         });
 
-        this.mainSelector.querySelector(".next_month")?.addEventListener("click", (e) => {
+        this.mainSelector.querySelector(".next_month").addEventListener("click", (e) => {
             e.preventDefault();
+            
             this.prevOrNextMonthOrYear(1, "month");
             this.updateCalendarAndSetNewMonth();
         });
@@ -375,6 +381,7 @@ class CalendarInput {
 
     callBackUpdateCalendar(){
         return () => {
+            console.log(this.checkIfDateFromInputIsValid());
             if(!this.checkIfDateFromInputIsValid() && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(this.inputTxtCalendar.value)){
                 this.inputTxtCalendar.classList.add("invalid");
                 this.inputTxtCalendar.classList.add("animate");
@@ -409,13 +416,15 @@ class CalendarInput {
         }
 
 
+        //sers de rollback
         if (step == -1) {
             if (this.selectedCalendar.getFullYear() < this.minYearSelectable) {
                 this.selectedCalendar.setMonth(month);
                 this.selectedCalendar.setFullYear(year);
+                console.log(this.selectedCalendar);
             }
         } else if (step == 1) {
-            if (this.selectedCalendar.getFullYear() >= this.maxYearSelectable) {
+            if (this.selectedCalendar.getFullYear() > this.maxYearSelectable) {
                 this.selectedCalendar.setMonth(month);
                 this.selectedCalendar.setFullYear(year);
             }
@@ -544,7 +553,10 @@ class CalendarInput {
         button.addEventListener("click", (e) => {
             e.preventDefault();
             this.inputTxtCalendar.classList.remove("invalid");
-            this.mainSelector.querySelector(".selected_date")?.classList.remove("selected_date");
+            let selected = this.mainSelector.querySelector(".selected_date");
+            if(selected){
+                selected.classList.remove("selected_date");
+            }
             button.parentElement.classList.add("selected_date");
             this.setSelectedDate(year, month, counterDay);
             this.setDateInInput();
@@ -574,7 +586,7 @@ class CalendarInput {
 // let calendar = new CalendarInput(document.querySelector(".calendar_input"));
 let calendarsArray = new Array();
 
-document.querySelectorAll(".calendar_input")?.forEach((calendar) => {
+document.querySelectorAll(".calendar_input").forEach((calendar) => {
     calendarsArray.push(new CalendarInput(calendar, "jj", "mm", "aaaa", "/"));
 });
 
