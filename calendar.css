@@ -1,0 +1,153 @@
+:root{
+    font-size: 16px;
+}
+
+*, *::after, *::before{
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    margin: 20px;
+}
+
+.calendar_input{
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 3px;
+}
+
+.calendar_input input{
+    font-size: 16px;
+    width: 100px;
+    padding: 5px;
+}
+
+.calendar_input .calendar{
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    left: 0;
+    top: 100%;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.calendar_input .calendar td{
+    min-width: 40px;
+    max-width: 40px;
+    height: 40px;
+
+    text-align: center;
+}
+
+
+.calendar_input .calendar .month_year > div:not(.buttons_today_selected_date_container){
+    display: flex;
+    justify-content: center;
+    gap: 1px;
+    height: 35px;
+    align-items: center;
+    position: relative;
+}
+
+.calendar_input .calendar .buttons_today_selected_date_container{
+    align-items: stretch;
+    display: flex;
+}
+
+.calendar_input .calendar .buttons_today_selected_date_container > button{
+    flex: 1;
+    padding: 5px 0;
+    font-size: 12px;
+}
+
+/*Cible les boutons dans le header du calendrier pour avancer d'un mois/année*/
+.calendar_input .calendar .month_year > div > div > button{
+    width: 32px;
+    height: 32px;
+}
+
+/*Les conteneurs de boutons*/
+.calendar_input .calendar .month_year > div > .prev,
+.calendar_input .calendar .month_year > div > .next{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+}
+
+.calendar_input .calendar .month_year > div > .prev{
+    left: 1px;
+}
+.calendar_input .calendar .month_year > div > .next{
+    right: 1px;
+}
+
+.calendar_input .calendar .month_year select{
+    text-align: center;
+    padding: 3px 3px;
+    height: 32px;
+    border-radius: 0;
+    border-style: none;
+    border: 1px solid gray;
+}
+
+.calendar_input .calendar .today_date {
+    background-color: lightblue;
+}
+
+.calendar_input .calendar .today_date > button {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.calendar_input .calendar .today_date.selected_date {
+    border-radius: 50%;
+}
+
+.calendar_input .calendar .selected_date::after{
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 2px solid red;
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+.calendar_input .calendar .number_day > button{
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    border-style: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.calendar_input .calendar .number_day{
+    position: relative;
+}
+.calendar_input .calendar .number_day:not(.selected_date):hover::after{
+    position: absolute;
+    pointer-events: none;
+    content: "";
+    border-radius: 50%;
+    opacity: 0.2;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border: 2px solid red;
+}
+
+hr{
+    margin: 100px 0;
+}
