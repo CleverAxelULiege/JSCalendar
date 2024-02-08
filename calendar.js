@@ -163,10 +163,9 @@ class CalendarInput {
 
     /**
      * @param {string} inputValue 
-     * @returns {string} La date de l'input sans séparateurs "/" ou "-"
      */
     removeSeparatorsFromInput(inputValue) {
-        return inputValue.replace(/\//g, "").replace(/-/g, "");
+        return inputValue.replace(/\D/g, "");
     }
 
 
