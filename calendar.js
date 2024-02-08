@@ -610,17 +610,17 @@ let calendarsArray = new Array();
  * @param {string} separator 
  */
 function validatePlaceHolders(day, month, year, separator){
-    if(day.length != 2){
-        throw new Error("The day placeholder must have a length of 2 characters");
+    if(day.length != 2 || /\d/g.test(day)){
+        throw new Error("The day placeholder must have a length of 2 characters, and not contains any digit inside.");
     }
-    if(month.length != 2){
-        throw new Error("The month placeholder must have a length of 2 characters");
+    if(month.length != 2 || /\d/g.test(month)){
+        throw new Error("The month placeholder must have a length of 2 characters, and not contains any digit inside.");
     }
-    if(year.length != 4){
-        throw new Error("The year placeholder must have a length of 4 characters");
+    if(year.length != 4 || /\d/g.test(year)){
+        throw new Error("The year placeholder must have a length of 4 characters, and not contains any digit inside.");
     }
-    if(separator.length != 1){
-        throw new Error("The separator placeholder must have a length of 1 character");
+    if(separator.length != 1 || /\d/g.test(separator)){
+        throw new Error("The separator placeholder must have a length of 1 character, and not contains any digit inside.");
     }
 }
 
