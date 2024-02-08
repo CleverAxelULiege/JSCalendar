@@ -165,7 +165,6 @@ export class SmartInput {
         if (this.counterInputDay == RESET_COUNTER) {
             this.counterInputDay = 0;
             this.partSelected[this.indexDate.day] = "";
-            // this.selectedDay = "";
         }
 
         let parsedDay = parseInt(key);
@@ -205,7 +204,7 @@ export class SmartInput {
     inputOnMonth(key) {
         if (this.counterInputMonth == RESET_COUNTER) {
             this.counterInputMonth = 0;
-            this.selectedMonth = "";
+            this.partSelected[this.indexDate.month] = "";
         }
 
         let parsedMonth = parseInt(key);
@@ -214,22 +213,22 @@ export class SmartInput {
             throw new Error("Month is NaN");
         }
 
-        if (parsedMonth > 1 && this.selectedMonth == "") {
-            this.selectedMonth = "0" + key;
+        if (parsedMonth > 1 && this.partSelected[this.indexDate.month] == "") {
+            this.partSelected[this.indexDate.month] = "0" + key;
             this.counterInputMonth = 10;
         } else {
 
-            parsedMonth = parseInt(this.selectedMonth + key);
+            parsedMonth = parseInt(this.partSelected[this.indexDate.month] + key);
 
             if (isNaN(parsedMonth)) {
                 throw new Error("Month is NaN");
             }
 
-            if (this.selectedMonth != "" && (parsedMonth > 12 || parsedMonth <= 0)) {
+            if (this.partSelected[this.indexDate.month] != "" && (parsedMonth > 12 || parsedMonth <= 0)) {
                 return;
             }
 
-            this.selectedMonth = this.selectedMonth + key;
+            this.partSelected[this.indexDate.month] = this.partSelected[this.indexDate.month] + key;
             this.counterInputMonth++;
         }
 
@@ -246,10 +245,10 @@ export class SmartInput {
     inputOnYear(key) {
         if (this.counterInputYear == RESET_COUNTER) {
             this.counterInputYear = 0;
-            this.selectedYear = "";
+            this.partSelected[this.indexDate.year] = "";
         }
 
-        this.selectedYear = this.selectedYear + key;
+        this.partSelected[this.indexDate.year] = this.partSelected[this.indexDate.year] + key;
 
         this.updateValueInInput();
         this.counterInputYear++;
@@ -262,7 +261,8 @@ export class SmartInput {
 
     updateValueInInput() {
         // this.input.value = this.datePlaceHolder
-        this.input.value = `${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.day], this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedMonth, this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedYear, this.yearPlaceHolder)}`
+        this.input.value = this.datePlaceHolder.map((d, index) => this.replaceMissingPartByPlaceHolder(this.partSelected[index], d)).join(this.separatorPlaceHolder);
+        // this.input.value = `${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.day], this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.month], this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.year], this.yearPlaceHolder)}`
     }
 
     /**
