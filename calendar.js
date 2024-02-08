@@ -15,9 +15,11 @@ class CalendarInput {
         this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
 
-        this.indexYear = -1;
-        this.indexMonth = -1;
-        this.indexDay = -1;
+        this.index = {
+            day: -1,
+            month: -1,
+            year: -1,
+        };
 
         this.substringPositionDate = {
             day: 0,
@@ -25,6 +27,9 @@ class CalendarInput {
             year: 0,
         };
 
+        this.setIndexAndPositionSubstring(dateFormat);
+
+        console.log(this.substringPositionDate);
 
         /**
          * Date d'aujourd'hui, normalement fixe
@@ -40,9 +45,9 @@ class CalendarInput {
 
         /** @type {HTMLInputElement}*/
         this.inputTxtCalendar = mainSelector.querySelector("input[type=tel]");
-
         if (this.inputTxtCalendar == null) {
             window.alert("Error the input needs to be of type 'tel' for the input date");
+            throw new Error("The input needs to be of type tel")
         }
 
 
@@ -57,7 +62,9 @@ class CalendarInput {
             this.setDateInInput();
         } else {
             this.selectedDate = new Date();
-            if (this.inputTxtCalendar.value != "" || (this.inputTxtCalendar.value == "" && mainSelector.getAttribute("data-set-today-date-if-blank") == "true")) {
+            //si ce n'est pas vide c'est que la date est erronée donc on la met à aujourd'hui par défaut OU
+            //si c'est vide et qu'on a précisé via un attribut qu'on voulait une date par défaut on affiche la date
+            if (this.inputTxtCalendar.value != "" || (this.inputTxtCalendar.value == "" && mainSelector.getAttribute("data-set-default-date-if-blank") == "true")) {
                 this.setDateInInput();
             }
         }
@@ -607,6 +614,64 @@ class CalendarInput {
 
     isToday(year, month, day) {
         return year == this.todayDate.getFullYear() && month == this.todayDate.getMonth() && day == this.todayDate.getDate();
+    }
+
+    /**
+     * @param {string} dateFormat
+     */
+    setIndexAndPositionSubstring(dateFormat){
+        dateFormat = dateFormat.toLowerCase();
+        if(!["ymd", "dmy", "mdy"].includes(dateFormat)){
+            throw new Error("Possibles values for the date format are : \"ymd\", \"dmy\", \"mdy\"");
+        }
+
+        for (let i = 0; i < dateFormat.length; i++) {
+            switch (dateFormat[i]) {
+                case "y":
+                    this.index.year = i;
+                    if (this.index.month == -1 && this.index.day == -1) {
+                        this.substringPositionDate.year = 0;
+                    }
+                    else if (this.index.month != -1 && this.index.day == -1 || this.index.month == -1 && this.index.day != -1) {
+                        this.substringPositionDate.year = 3;
+                    } else {
+                        this.substringPositionDate.year = 6;
+                    }
+                    break;
+                case "m":
+                    this.index.month = i;
+                    if (this.index.year == -1 && this.index.day == -1) {
+                        this.substringPositionDate.month = 0;
+                    }
+                    else if (this.index.year != -1 && this.index.day == -1) {
+                        this.substringPositionDate.month = 5;
+                    }
+                    else if(this.index.year == -1 && this.index.day != -1){
+                        this.substringPositionDate.month = 3;
+                    } 
+                    else {
+                        this.substringPositionDate.month = 8;
+                    }
+                    break;
+                case "d":
+                    this.index.day = i;
+                    if (this.index.year == -1 && this.index.month == -1) {
+                        this.substringPositionDate.day = 0;
+                    }
+                    else if (this.index.year != -1 && this.index.month == -1) {
+                        this.substringPositionDate.day = 5;
+                    }
+                    else if(this.index.year == -1 && this.index.month != -1){
+                        this.substringPositionDate.day = 3;
+                    } 
+                    else {
+                        this.substringPositionDate.day = 8;
+                    }
+                    break;
+                default:
+                    throw new Error("Use only y for years, m for monthes and d for days");
+            }
+        }
     }
 
 }
