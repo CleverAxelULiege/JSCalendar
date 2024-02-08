@@ -9,7 +9,7 @@ class CalendarInput {
      * @param {string} separatorPlaceHolder 
      * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "ymd") {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "mdy") {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
@@ -20,6 +20,8 @@ class CalendarInput {
             month: -1,
             year: -1,
         };
+
+        this.date = new Array(3).fill(null);
 
         this.substringPositionDate = {
             day: 0,
@@ -107,15 +109,13 @@ class CalendarInput {
             return false
         }
 
-        let inputWithoutSeparator = this.removeSeparatorsFromInput(inputValue);
-
-        if (inputWithoutSeparator.length != 8) {
+        if (inputValue.length != 10) {
             return false
         }
 
-        let year = parseInt(inputWithoutSeparator.substring(4, 10));
-        let month = parseInt(inputWithoutSeparator.substring(2, 4));
-        let day = parseInt(inputWithoutSeparator.substring(0, 2));
+        let year = parseInt(inputValue.substring(this.substringPositionDate.year, this.substringPositionDate.year + 4));
+        let month = parseInt(inputValue.substring(this.substringPositionDate.month, this.substringPositionDate.month + 2));
+        let day = parseInt(inputValue.substring(this.substringPositionDate.day, this.substringPositionDate.day + 2));
 
         if (isNaN(year) || isNaN(month) || isNaN(day)) {
             return false
@@ -152,10 +152,10 @@ class CalendarInput {
     }
 
     getDateFromInput() {
-        let inputWithoutSeparator = this.removeSeparatorsFromInput(this.inputTxtCalendar.value);
-        let year = parseInt(inputWithoutSeparator.substring(4, 10));
-        let month = parseInt(inputWithoutSeparator.substring(2, 4));
-        let day = parseInt(inputWithoutSeparator.substring(0, 2));
+        // let inputWithoutSeparator = this.removeSeparatorsFromInput(this.inputTxtCalendar.value);
+        let year = parseInt(this.inputTxtCalendar.value.substring(this.substringPositionDate.year, this.substringPositionDate.year + 4));
+        let month = parseInt(this.inputTxtCalendar.value.substring(this.substringPositionDate.month, this.substringPositionDate.month + 2));
+        let day = parseInt(this.inputTxtCalendar.value.substring(this.substringPositionDate.day, this.substringPositionDate.day + 2));
 
         return new Date(year, month - 1, day);
     }
@@ -164,9 +164,15 @@ class CalendarInput {
      * Formate la date dd mm yyyy dans l'input
      */
     setDateInInput() {
-        let month = this.selectedDate.getMonth() + 1;
-        let day = this.selectedDate.getDate();
-        this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separatorPlaceHolder}${(month < 10 ? "0" + month : month).toString()}${this.separatorPlaceHolder}${this.selectedDate.getFullYear().toString()}`;
+        this.date[this.index.year] = this.selectedDate.getFullYear();
+        this.date[this.index.month] = this.selectedDate.getMonth() + 1;
+        this.date[this.index.day] = this.selectedDate.getDate();
+
+        this.inputTxtCalendar.value = this.date.map((d) => d < 10 ? "0" + d.toString() : d.toString()).join(this.separatorPlaceHolder);
+
+        // let month = this.selectedDate.getMonth() + 1;
+        // let day = this.selectedDate.getDate();
+        // this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separatorPlaceHolder}${(month < 10 ? "0" + month : month).toString()}${this.separatorPlaceHolder}${this.selectedDate.getFullYear().toString()}`;
     }
 
     setSelectedDate(year, month, day) {
