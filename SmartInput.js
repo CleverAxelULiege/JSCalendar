@@ -8,8 +8,10 @@ export class SmartInput {
      * @param {string} yearPlaceHolder 
      * @param {string} separatorPlaceHolder 
      * @param {(inputValue:string) => void} callbackUpdateCalendar 
+     * @param {{day:number, month:number, year:number}} substringPositionDate
+     * @param {{day:number, month:number, year:number}} indexDate 
      */
-    constructor(input, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, callbackUpdateCalendar) {
+    constructor(input, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, callbackUpdateCalendar, substringPositionDate, indexDate) {
         /**@type {HTMLInputElement} */
         this.input = input;
 
@@ -17,10 +19,22 @@ export class SmartInput {
         this.hiddenInput = input.nextElementSibling;
 
 
-
         if(!this.hiddenInput || (this.hiddenInput.tagName.toUpperCase() != "INPUT" || this.hiddenInput.getAttribute("type") != "hidden")){
             window.alert("An input tag needs to be added just below the input tel with the type 'hidden'");
         }
+
+        /**@type {{day:number, month:number, year:number}} */
+        this.indexDate = indexDate;
+
+        this.datePlaceHolder = new Array(3);
+        this.datePlaceHolder[indexDate.day] = dayPlaceHolder;
+        this.datePlaceHolder[indexDate.month] = monthPlaceHolder;
+        this.datePlaceHolder[indexDate.year] = yearPlaceHolder;
+
+        this.partSelected = new Array(3);
+        this.partSelected[indexDate.day] = "";
+        this.partSelected[indexDate.month] = "";
+        this.partSelected[indexDate.year] = "";
 
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
@@ -43,16 +57,16 @@ export class SmartInput {
 
         this.selection = {
             day: {
-                start: 0,
-                end: 2,
+                start: substringPositionDate.day,
+                end: substringPositionDate.day + 2,
             },
             month: {
-                start: 3,
-                end: 5,
+                start: substringPositionDate.month,
+                end: substringPositionDate.month + 2,
             },
             year: {
-                start: 6,
-                end: 10,
+                start: substringPositionDate.year,
+                end: substringPositionDate.year + 4,
             },
         }
 
@@ -119,10 +133,9 @@ export class SmartInput {
                 this.inputOnYear(key);
             }
 
+            //update
             this.hiddenInput.value = this.input.value;
             this.callbackUpdateCalendar(this.hiddenInput.value);
-
-            console.log(this.hiddenInput.value);
         }
 
 
@@ -151,7 +164,8 @@ export class SmartInput {
     inputOnDay(key) {
         if (this.counterInputDay == RESET_COUNTER) {
             this.counterInputDay = 0;
-            this.selectedDay = "";
+            this.partSelected[this.indexDate.day] = "";
+            // this.selectedDay = "";
         }
 
         let parsedDay = parseInt(key);
@@ -160,22 +174,22 @@ export class SmartInput {
             throw new Error("Day is NaN");
         }
 
-        if (parsedDay > 3 && this.selectedDay == "") {
-            this.selectedDay = "0" + key;
+        if (parsedDay > 3 && this.partSelected[this.indexDate.day] == "") {
+            this.partSelected[this.indexDate.day] = "0" + key;
             this.counterInputDay = 10;
         } else {
-            parsedDay = parseInt(this.selectedDay + key);
+            parsedDay = parseInt(this.partSelected[this.indexDate.day] + key);
 
             if (isNaN(parsedDay)) {
                 throw new Error("Day is NaN");
             }
 
-            if (this.selectedDay != "" && (parsedDay > 31 || parsedDay <= 0)) {
+            if (this.partSelected[this.indexDate.day] != "" && (parsedDay > 31 || parsedDay <= 0)) {
                 return;
             }
 
             this.counterInputDay++;
-            this.selectedDay = this.selectedDay + key;
+            this.partSelected[this.indexDate.day] = this.partSelected[this.indexDate.day] + key;
         }
 
         this.updateValueInInput();
@@ -247,7 +261,8 @@ export class SmartInput {
     }
 
     updateValueInInput() {
-        this.input.value = `${this.replaceMissingPartByPlaceHolder(this.selectedDay, this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedMonth, this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedYear, this.yearPlaceHolder)}`
+        // this.input.value = this.datePlaceHolder
+        this.input.value = `${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.day], this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedMonth, this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedYear, this.yearPlaceHolder)}`
     }
 
     /**

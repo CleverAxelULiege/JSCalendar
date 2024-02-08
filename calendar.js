@@ -9,7 +9,7 @@ class CalendarInput {
      * @param {string} separatorPlaceHolder 
      * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "mdy") {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "dmy") {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
@@ -28,7 +28,6 @@ class CalendarInput {
             month: 0,
             year: 0,
         };
-
         this.setIndexAndPositionSubstring(dateFormat);
 
         console.log(this.substringPositionDate);
@@ -71,7 +70,7 @@ class CalendarInput {
             }
         }
 
-        this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar());
+        this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar(), this.substringPositionDate, this.index);
         this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
         this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
 
