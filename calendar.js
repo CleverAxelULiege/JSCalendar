@@ -7,12 +7,23 @@ class CalendarInput {
      * @param {string} monthPlaceHolder 
      * @param {string} yearPlaceHolder 
      * @param {string} separatorPlaceHolder 
+     * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder) {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "ymd") {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
+
+        this.indexYear = -1;
+        this.indexMonth = -1;
+        this.indexDay = -1;
+
+        this.substringPositionDate = {
+            day: 0,
+            month: 0,
+            year: 0,
+        };
 
 
         /**
@@ -30,27 +41,27 @@ class CalendarInput {
         /** @type {HTMLInputElement}*/
         this.inputTxtCalendar = mainSelector.querySelector("input[type=tel]");
 
-        if(this.inputTxtCalendar == null){
+        if (this.inputTxtCalendar == null) {
             window.alert("Error the input needs to be of type 'tel' for the input date");
         }
 
-        
+
         /**
          * Date sélectionnée par l'input ou l'utilisateur
          * @type {Date|null}
         */
-       this.selectedDate = null;
-       
-       if(this.checkIfDateFromInputIsValid(this.inputTxtCalendar.value)){
-           this.selectedDate = this.getDateFromInput();
-           this.setDateInInput();
+        this.selectedDate = null;
+
+        if (this.checkIfDateFromInputIsValid(this.inputTxtCalendar.value)) {
+            this.selectedDate = this.getDateFromInput();
+            this.setDateInInput();
         } else {
             this.selectedDate = new Date();
-            if(this.inputTxtCalendar.value != "" || (this.inputTxtCalendar.value == "" && mainSelector.getAttribute("data-set-today-date-if-blank") == "true")){
+            if (this.inputTxtCalendar.value != "" || (this.inputTxtCalendar.value == "" && mainSelector.getAttribute("data-set-today-date-if-blank") == "true")) {
                 this.setDateInInput();
             }
         }
-        
+
         this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar());
         this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
         this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
@@ -609,17 +620,17 @@ let calendarsArray = new Array();
  * @param {string} year 
  * @param {string} separator 
  */
-function validatePlaceHolders(day, month, year, separator){
-    if(day.length != 2 || /\d/g.test(day)){
+function validatePlaceHolders(day, month, year, separator) {
+    if (day.length != 2 || /\d/g.test(day)) {
         throw new Error("The day placeholder must have a length of 2 characters, and not contains any digit inside.");
     }
-    if(month.length != 2 || /\d/g.test(month)){
+    if (month.length != 2 || /\d/g.test(month)) {
         throw new Error("The month placeholder must have a length of 2 characters, and not contains any digit inside.");
     }
-    if(year.length != 4 || /\d/g.test(year)){
+    if (year.length != 4 || /\d/g.test(year)) {
         throw new Error("The year placeholder must have a length of 4 characters, and not contains any digit inside.");
     }
-    if(separator.length != 1 || /\d/g.test(separator)){
+    if (separator.length != 1 || /\d/g.test(separator)) {
         throw new Error("The separator placeholder must have a length of 1 character, and not contains any digit inside.");
     }
 }
