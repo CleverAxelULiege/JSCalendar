@@ -14,39 +14,47 @@ class CalendarInput {
         this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
 
-        
+
         /**
          * Date d'aujourd'hui, normalement fixe
          * @type {Date}
         */
-       this.todayDate = new Date();
-       
-       /**
-        * @type {HTMLDivElement}
-       */
-      this.mainSelector = mainSelector;
-      this.mainSelector.setAttribute("data-active", "false");
-      
-      /**
-       * @type {HTMLInputElement}
-      */
-     this.inputTxtCalendar = mainSelector.querySelector("input");
-     this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar());
+        this.todayDate = new Date();
 
         /**
-         * Date sélectionnée par l'input ou l'utilisateur
-         * @type {Date}
-         */
-        this.selectedDate = this.checkIfDateFromInputIsValid() ? this.getDateFromInput() : new Date();
+         * @type {HTMLDivElement}
+        */
+        this.mainSelector = mainSelector;
+        this.mainSelector.setAttribute("data-active", "false");
 
-        if(this.checkIfDateFromInputIsValid()){
-            this.setDateInInput();
+        /** @type {HTMLInputElement}*/
+        this.inputTxtCalendar = mainSelector.querySelector("input[type=tel]");
+
+        if(this.inputTxtCalendar == null){
+            window.alert("Error the input needs to be of type 'tel' for the input date");
         }
 
-        this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
-
-        this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
         
+        /**
+         * Date sélectionnée par l'input ou l'utilisateur
+         * @type {Date|null}
+        */
+       this.selectedDate = null;
+       
+       if(this.checkIfDateFromInputIsValid(this.inputTxtCalendar.value)){
+           this.selectedDate = this.getDateFromInput();
+           this.setDateInInput();
+        } else {
+            this.selectedDate = new Date();
+            if(this.inputTxtCalendar.value != "" || (this.inputTxtCalendar.value == "" && mainSelector.getAttribute("data-set-today-date-if-blank") == "true")){
+                this.setDateInInput();
+            }
+        }
+        
+        this.smartInput = new SmartInput(this.inputTxtCalendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, this.callBackUpdateCalendar());
+        this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
+        this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
+
 
         /**
          * Le calendrier sélectionné quand l'on change de mois/année sans toucher à selectedDate
@@ -60,8 +68,11 @@ class CalendarInput {
         this.addEventListenerToButtonToggle();
 
         this.inputTxtCalendar.addEventListener("blur", () => {
-            if(!this.checkIfDateFromInputIsValid()){
+            //nextElementSibling doit être l'input hidden.
+            if (this.inputTxtCalendar.nextElementSibling.value != "" && !this.checkIfDateFromInputIsValid(this.inputTxtCalendar.nextElementSibling.value)) {
                 this.invalidDate();
+            } else {
+                this.inputTxtCalendar.classList.remove("invalid");
             }
         });
 
@@ -71,13 +82,14 @@ class CalendarInput {
 
     /**
      * Regarde si la date venant de l'input est dans un format valide et est valide
+     * @param {string} inputValue 
      */
-    checkIfDateFromInputIsValid() {
-        if (this.inputTxtCalendar.value.trim() == "") {
+    checkIfDateFromInputIsValid(inputValue) {
+        if (inputValue.trim() == "") {
             return false
         }
 
-        let inputWithoutSeparator = this.removeSeparatorsFromInput();
+        let inputWithoutSeparator = this.removeSeparatorsFromInput(inputValue);
 
         if (inputWithoutSeparator.length != 8) {
             return false
@@ -122,7 +134,7 @@ class CalendarInput {
     }
 
     getDateFromInput() {
-        let inputWithoutSeparator = this.removeSeparatorsFromInput();
+        let inputWithoutSeparator = this.removeSeparatorsFromInput(this.inputTxtCalendar.value);
         let year = parseInt(inputWithoutSeparator.substring(4, 10));
         let month = parseInt(inputWithoutSeparator.substring(2, 4));
         let day = parseInt(inputWithoutSeparator.substring(0, 2));
@@ -150,11 +162,11 @@ class CalendarInput {
     }
 
     /**
-     * 
+     * @param {string} inputValue 
      * @returns {string} La date de l'input sans séparateurs "/" ou "-"
      */
-    removeSeparatorsFromInput() {
-        return this.inputTxtCalendar.value.replace(/\//g, "").replace(/-/g, "");
+    removeSeparatorsFromInput(inputValue) {
+        return inputValue.replace(/\//g, "").replace(/-/g, "");
     }
 
 
@@ -376,27 +388,26 @@ class CalendarInput {
 
         this.mainSelector.querySelector(".next_month").addEventListener("click", (e) => {
             e.preventDefault();
-            
+
             this.prevOrNextMonthOrYear(1, "month");
             this.updateCalendarAndSetNewMonth();
         });
     }
 
-    invalidDate(){
+    invalidDate() {
         this.inputTxtCalendar.classList.add("invalid");
         this.inputTxtCalendar.classList.add("animate");
 
-        this.inputTxtCalendar.addEventListener("animationend", () => {this.inputTxtCalendar.classList.remove("animate")}, {once: true});
+        this.inputTxtCalendar.addEventListener("animationend", () => { this.inputTxtCalendar.classList.remove("animate") }, { once: true });
     }
 
-    callBackUpdateCalendar(){
-        return () => {
-            console.log(this.checkIfDateFromInputIsValid());
-            if(!this.checkIfDateFromInputIsValid() && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(this.inputTxtCalendar.value)){
+    callBackUpdateCalendar() {
+        return (inputValue) => {
+            if (!this.checkIfDateFromInputIsValid(inputValue) && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(inputValue)) {
                 this.invalidDate();
             }
 
-            if (this.checkIfDateFromInputIsValid()) {
+            if (this.checkIfDateFromInputIsValid(inputValue)) {
                 this.setSelectedDateFromInput();
                 this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
                 this.updateCalendarAndSetNewMonth();
@@ -561,7 +572,7 @@ class CalendarInput {
             e.preventDefault();
             this.inputTxtCalendar.classList.remove("invalid");
             let selected = this.mainSelector.querySelector(".selected_date");
-            if(selected){
+            if (selected) {
                 selected.classList.remove("selected_date");
             }
             button.parentElement.classList.add("selected_date");
@@ -593,8 +604,34 @@ class CalendarInput {
 // let calendar = new CalendarInput(document.querySelector(".calendar_input"));
 let calendarsArray = new Array();
 
+/**
+ * @param {string} day 
+ * @param {string} month 
+ * @param {string} year 
+ * @param {string} separator 
+ */
+function validatePlaceHolders(day, month, year, separator){
+    if(day.length != 2){
+        throw new Error("The day placeholder must have a length of 2 characters");
+    }
+    if(month.length != 2){
+        throw new Error("The month placeholder must have a length of 2 characters");
+    }
+    if(year.length != 4){
+        throw new Error("The year placeholder must have a length of 4 characters");
+    }
+    if(separator.length != 1){
+        throw new Error("The separator placeholder must have a length of 1 character");
+    }
+}
+
 document.querySelectorAll(".calendar_input").forEach((calendar) => {
-    calendarsArray.push(new CalendarInput(calendar, "jj", "mm", "aaaa", "/"));
+    let dayPlaceHolder = calendar.getAttribute("data-day-placeholder") ? calendar.getAttribute("data-day-placeholder") : "jj";
+    let monthPlaceHolder = calendar.getAttribute("data-month-placeholder") ? calendar.getAttribute("data-month-placeholder") : "mm";
+    let yearPlaceHolder = calendar.getAttribute("data-year-placeholder") ? calendar.getAttribute("data-year-placeholder") : "aaaa";
+    let separatorPlaceHolder = calendar.getAttribute("data-separator-placeholder") ? calendar.getAttribute("data-separator-placeholder") : "/";
+    validatePlaceHolders(dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder);
+    calendarsArray.push(new CalendarInput(calendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder));
 });
 
 let oldCalendarActive = null;

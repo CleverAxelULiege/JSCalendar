@@ -9,18 +9,26 @@
 <body>
     <div>
 
-        <div class="calendar_input" data-min-year-selectable="1900">
-            <input type="tel" value="20/10/2024" autocomplete="off">
+        <div class="calendar_input" 
+        data-min-year-selectable="1900" 
+        data-set-today-date-if-blank="true" 
+        data-day-placeholder="jj" 
+        data-month-placeholder="mm" 
+        data-year-placeholder="aaaa"
+        data-separator-placeholder="/">
+            <input type="tel" value="31/25/2024" autocomplete="off">
+            <input type="hidden" value="">
             <button id="toggle_button">Choisir une date</button>
         </div>
-
+        
     </div>
-
+    
     <hr>
-
+    
     <div>
-        <div class="calendar_input">
-            <input type="tel" value="" autocomplete="off">
+        <div class="calendar_input" data-set-today-date-if-blank="false">
+            <input type="tel" value="" autocomplete="off" >
+            <input type="hidden" value="">
             <button id="toggle_button">Choisir une date</button>
         </div>
     </div>

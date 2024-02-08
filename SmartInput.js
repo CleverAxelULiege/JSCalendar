@@ -7,17 +7,27 @@ export class SmartInput {
      * @param {string} monthPlaceHolder 
      * @param {string} yearPlaceHolder 
      * @param {string} separatorPlaceHolder 
-     * @param {() => void} callbackUpdateCalendar 
+     * @param {(inputValue:string) => void} callbackUpdateCalendar 
      */
     constructor(input, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, callbackUpdateCalendar) {
         /**@type {HTMLInputElement} */
         this.input = input;
+
+        /**@type {HTMLElement|HTMLInputElement|null} */
+        this.hiddenInput = input.nextElementSibling;
+
+
+
+        if(!this.hiddenInput || (this.hiddenInput.tagName.toUpperCase() != "INPUT" || this.hiddenInput.getAttribute("type") != "hidden")){
+            window.alert("An input tag needs to be added just below the input tel with the type 'hidden'");
+        }
+
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
 
-        /**@type {() => void} */
+        /**@type {(inputValue:string) => void} */
         this.callbackUpdateCalendar = callbackUpdateCalendar;
 
         this.selectionPosition = -1;
@@ -49,6 +59,13 @@ export class SmartInput {
         if(input.value.trim() == ""){
             this.updateValueInInput();
         }
+
+        if(this.input.value == `${this.dayPlaceHolder}${this.separatorPlaceHolder}${this.monthPlaceHolder}${this.separatorPlaceHolder}${this.yearPlaceHolder}`){
+            this.hiddenInput.value = "";
+        } else {
+            this.hiddenInput.value = this.input.value;
+        }
+
         this.initEventListeners();
     }
 
@@ -102,7 +119,10 @@ export class SmartInput {
                 this.inputOnYear(key);
             }
 
-            this.callbackUpdateCalendar();
+            this.hiddenInput.value = this.input.value;
+            this.callbackUpdateCalendar(this.hiddenInput.value);
+
+            console.log(this.hiddenInput.value);
         }
 
 
@@ -245,7 +265,6 @@ export class SmartInput {
 
     clearDate() {
         let date = `${this.replaceMissingPartByPlaceHolder(this.selectedDay, this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedMonth, this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedYear, this.yearPlaceHolder)}`;
-        let newDate = "";
 
         for (let i = 0; i < date.length; i++) {
             if (i >= this.input.selectionStart && i < this.input.selectionEnd && date[i] != this.separatorPlaceHolder) {
@@ -264,6 +283,13 @@ export class SmartInput {
             }
         }
         this.updateValueInInput();
+
+        if(this.input.value == `${this.dayPlaceHolder}${this.separatorPlaceHolder}${this.monthPlaceHolder}${this.separatorPlaceHolder}${this.yearPlaceHolder}`){
+            this.hiddenInput.value = "";
+        } else {
+            this.hiddenInput.value = this.input.value;
+        }
+
         if(this.selectedDay == ""){
             this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
         }
