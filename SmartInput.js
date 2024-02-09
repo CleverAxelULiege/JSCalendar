@@ -9,9 +9,9 @@ export class SmartInput {
      * @param {string} separatorPlaceHolder 
      * @param {(inputValue:string) => void} callbackUpdateCalendar 
      * @param {{day:number, month:number, year:number}} substringPositionDate
-     * @param {{day:number, month:number, year:number}} indexDate 
+     * @param {{day:number, month:number, year:number}} index 
      */
-    constructor(input, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, callbackUpdateCalendar, substringPositionDate, indexDate) {
+    constructor(input, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, callbackUpdateCalendar, substringPositionDate, index) {
         /**@type {HTMLInputElement} */
         this.input = input;
 
@@ -24,84 +24,55 @@ export class SmartInput {
         }
 
         /**@type {{day:number, month:number, year:number}} */
-        this.indexDate = indexDate;
+        this.index = index;
 
         this.datePlaceHolder = new Array(3);
-        this.datePlaceHolder[indexDate.day] = dayPlaceHolder;
-        this.datePlaceHolder[indexDate.month] = monthPlaceHolder;
-        this.datePlaceHolder[indexDate.year] = yearPlaceHolder;
+        this.datePlaceHolder[index.day] = dayPlaceHolder;
+        this.datePlaceHolder[index.month] = monthPlaceHolder;
+        this.datePlaceHolder[index.year] = yearPlaceHolder;
 
         this.partSelected = new Array(3);
-        this.partSelected[indexDate.day] = "";
-        this.partSelected[indexDate.month] = "";
-        this.partSelected[indexDate.year] = "";
+        this.partSelected[index.day] = "";
+        this.partSelected[index.month] = "";
+        this.partSelected[index.year] = "";
 
-        this.dayPlaceHolder = dayPlaceHolder;
-        this.monthPlaceHolder = monthPlaceHolder;
-        this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
 
         /**@type {(inputValue:string) => void} */
         this.callbackUpdateCalendar = callbackUpdateCalendar;
 
-        this.selectedDay = "";
         this.counterInputDay = RESET_COUNTER;
-
-        this.selectedMonth = "";
         this.counterInputMonth = RESET_COUNTER;
-
-        this.selectedYear = "";
         this.counterInputYear = RESET_COUNTER;
-
         this.counterSelectionPosition = 0;
 
         /**@type {{start:number, end:number}[]} */
         this.selectionPosition = new Array(3);
 
-        this.selectionPosition[indexDate.day] = {
+        this.selectionPosition[index.day] = {
             start: substringPositionDate.day,
             end: substringPositionDate.day + 2,
         };
-        this.selectionPosition[indexDate.month] = {
+        this.selectionPosition[index.month] = {
             start: substringPositionDate.month,
             end: substringPositionDate.month + 2,
         };
-        this.selectionPosition[indexDate.year] = {
+        this.selectionPosition[index.year] = {
             start: substringPositionDate.year,
             end: substringPositionDate.year + 4,
         };
-
-        this.selection = {
-            day: {
-                start: substringPositionDate.day,
-                end: substringPositionDate.day + 2,
-            },
-            month: {
-                start: substringPositionDate.month,
-                end: substringPositionDate.month + 2,
-            },
-            year: {
-                start: substringPositionDate.year,
-                end: substringPositionDate.year + 4,
-            },
-        }
 
         if (input.value.trim() == "") {
             this.updateValueInInput();
         }
 
         this.updateHiddenValue();
-
         this.initEventListeners();
     }
 
     initEventListeners() {
         this.input.addEventListener("keydown", this.onInput.bind(this));
         this.input.addEventListener("click", this.onClick.bind(this));
-        // this.input.addEventListener("select", (e) => {
-        //     console.log(this.input.selectionStart);
-        //     console.log(this.input.selectionEnd);
-        // })
     }
 
     /** @param {KeyboardEvent} event  */
@@ -121,13 +92,6 @@ export class SmartInput {
                 this.counterSelectionPosition++;
                 this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
             }
-            return;
-            if (this.input.selectionStart == this.selection.day.start) {
-                this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
-            }
-            else if (this.input.selectionStart == this.selection.month.start) {
-                this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
-            }
         }
 
         if (key == "ArrowLeft") {
@@ -136,27 +100,20 @@ export class SmartInput {
                 this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
             }
             return;
-            if (this.input.selectionStart == this.selection.year.start) {
-                this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
-            }
-            else if (this.input.selectionStart == this.selection.month.start) {
-                this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
-            }
         }
 
         if (/^\d$/.test(key)) {
-            if (this.input.selectionStart == this.selection.day.start) {
+            if (this.input.selectionStart == this.selectionPosition[this.index.day].start) {
                 this.inputOnDay(key);
             }
-            else if (this.input.selectionStart == this.selection.month.start) {
+            else if (this.input.selectionStart == this.selectionPosition[this.index.month].start) {
                 this.inputOnMonth(key);
             }
-            else if (this.input.selectionStart == this.selection.year.start) {
+            else if (this.input.selectionStart == this.selectionPosition[this.index.year].start) {
                 this.inputOnYear(key);
             }
 
-            //update
-            this.hiddenInput.value = this.input.value;
+            this.updateHiddenValue();
             this.callbackUpdateCalendar(this.hiddenInput.value);
         }
 
@@ -168,22 +125,21 @@ export class SmartInput {
         if (this.input.selectionStart == 10) {
             this.input.setSelectionRange(this.selectionPosition[0].start, this.selectionPosition[0].end);
             this.counterSelectionPosition = 0;
-            // this.input.setSelectionRange(this.selectionPosition[0].start, this.selection.day.end);
             return;
         }
 
         if (this.input.selectionStart == this.input.selectionEnd) {
-            if (this.input.selectionStart >= this.selectionPosition[this.indexDate.day].start && this.input.selectionStart <= this.selectionPosition[this.indexDate.day].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.indexDate.day].start, this.selectionPosition[this.indexDate.day].end);
-                this.counterSelectionPosition = this.indexDate.day;
+            if (this.input.selectionStart >= this.selectionPosition[this.index.day].start && this.input.selectionStart <= this.selectionPosition[this.index.day].end) {
+                this.input.setSelectionRange(this.selectionPosition[this.index.day].start, this.selectionPosition[this.index.day].end);
+                this.counterSelectionPosition = this.index.day;
             }
-            else if (this.input.selectionStart >= this.selectionPosition[this.indexDate.month].start && this.input.selectionStart <= this.selectionPosition[this.indexDate.month].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.indexDate.month].start, this.selectionPosition[this.indexDate.month].end);
-                this.counterSelectionPosition = this.indexDate.month;
+            else if (this.input.selectionStart >= this.selectionPosition[this.index.month].start && this.input.selectionStart <= this.selectionPosition[this.index.month].end) {
+                this.input.setSelectionRange(this.selectionPosition[this.index.month].start, this.selectionPosition[this.index.month].end);
+                this.counterSelectionPosition = this.index.month;
             }
-            else if (this.input.selectionStart >= this.selectionPosition[this.indexDate.year].start && this.input.selectionStart < this.selectionPosition[this.indexDate.year].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.indexDate.year].start, this.selectionPosition[this.indexDate.year].end);
-                this.counterSelectionPosition = this.indexDate.year;
+            else if (this.input.selectionStart >= this.selectionPosition[this.index.year].start && this.input.selectionStart < this.selectionPosition[this.index.year].end) {
+                this.input.setSelectionRange(this.selectionPosition[this.index.year].start, this.selectionPosition[this.index.year].end);
+                this.counterSelectionPosition = this.index.year;
             }
             
         }
@@ -192,7 +148,7 @@ export class SmartInput {
     inputOnDay(key) {
         if (this.counterInputDay == RESET_COUNTER) {
             this.counterInputDay = 0;
-            this.partSelected[this.indexDate.day] = "";
+            this.partSelected[this.index.day] = "";
         }
 
         let parsedDay = parseInt(key);
@@ -201,22 +157,22 @@ export class SmartInput {
             throw new Error("Day is NaN");
         }
 
-        if (parsedDay > 3 && this.partSelected[this.indexDate.day] == "") {
-            this.partSelected[this.indexDate.day] = "0" + key;
+        if (parsedDay > 3 && this.partSelected[this.index.day] == "") {
+            this.partSelected[this.index.day] = "0" + key;
             this.counterInputDay = 10;
         } else {
-            parsedDay = parseInt(this.partSelected[this.indexDate.day] + key);
+            parsedDay = parseInt(this.partSelected[this.index.day] + key);
 
             if (isNaN(parsedDay)) {
                 throw new Error("Day is NaN");
             }
 
-            if (this.partSelected[this.indexDate.day] != "" && (parsedDay > 31 || parsedDay <= 0)) {
+            if (this.partSelected[this.index.day] != "" && (parsedDay > 31 || parsedDay <= 0)) {
                 return;
             }
 
             this.counterInputDay++;
-            this.partSelected[this.indexDate.day] = this.partSelected[this.indexDate.day] + key;
+            this.partSelected[this.index.day] = this.partSelected[this.index.day] + key;
         }
 
         this.updateValueInInput();
@@ -229,17 +185,16 @@ export class SmartInput {
             }
             this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
 
-            // this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
             return
         }
-        this.input.setSelectionRange(this.selectionPosition[this.indexDate.day].start, this.selectionPosition[this.indexDate.day].end);
-        // this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
+
+        this.input.setSelectionRange(this.selectionPosition[this.index.day].start, this.selectionPosition[this.index.day].end);
     }
 
     inputOnMonth(key) {
         if (this.counterInputMonth == RESET_COUNTER) {
             this.counterInputMonth = 0;
-            this.partSelected[this.indexDate.month] = "";
+            this.partSelected[this.index.month] = "";
         }
 
         let parsedMonth = parseInt(key);
@@ -248,22 +203,22 @@ export class SmartInput {
             throw new Error("Month is NaN");
         }
 
-        if (parsedMonth > 1 && this.partSelected[this.indexDate.month] == "") {
-            this.partSelected[this.indexDate.month] = "0" + key;
+        if (parsedMonth > 1 && this.partSelected[this.index.month] == "") {
+            this.partSelected[this.index.month] = "0" + key;
             this.counterInputMonth = 10;
         } else {
 
-            parsedMonth = parseInt(this.partSelected[this.indexDate.month] + key);
+            parsedMonth = parseInt(this.partSelected[this.index.month] + key);
 
             if (isNaN(parsedMonth)) {
                 throw new Error("Month is NaN");
             }
 
-            if (this.partSelected[this.indexDate.month] != "" && (parsedMonth > 12 || parsedMonth <= 0)) {
+            if (this.partSelected[this.index.month] != "" && (parsedMonth > 12 || parsedMonth <= 0)) {
                 return;
             }
 
-            this.partSelected[this.indexDate.month] = this.partSelected[this.indexDate.month] + key;
+            this.partSelected[this.index.month] = this.partSelected[this.index.month] + key;
             this.counterInputMonth++;
         }
 
@@ -271,47 +226,39 @@ export class SmartInput {
 
         if (this.counterInputMonth > 1) {
             this.counterInputMonth = RESET_COUNTER;
-            // this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
             if(this.counterSelectionPosition < 2){
                 this.counterSelectionPosition++;
             }
             this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
-            // this.input.setSelectionRange(this.selectionPosition[this.indexDate.year].start, this.selectionPosition[this.indexDate.year].end);
             return
         }
-        // this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
-        this.input.setSelectionRange(this.selectionPosition[this.indexDate.month].start, this.selectionPosition[this.indexDate.month].end);
+        this.input.setSelectionRange(this.selectionPosition[this.index.month].start, this.selectionPosition[this.index.month].end);
     }
 
     inputOnYear(key) {
         if (this.counterInputYear == RESET_COUNTER) {
             this.counterInputYear = 0;
-            this.partSelected[this.indexDate.year] = "";
+            this.partSelected[this.index.year] = "";
         }
 
-        this.partSelected[this.indexDate.year] = this.partSelected[this.indexDate.year] + key;
+        this.partSelected[this.index.year] = this.partSelected[this.index.year] + key;
 
         this.updateValueInInput();
         this.counterInputYear++;
 
-        // this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
         if (this.counterInputYear > 3) {
             this.counterInputYear = RESET_COUNTER;
-            // this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
             if(this.counterSelectionPosition < 2){
                 this.counterSelectionPosition++;
             }
             this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
-            // this.input.setSelectionRange(this.selectionPosition[this.indexDate.year].start, this.selectionPosition[this.indexDate.year].end);
             return
         }
         this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
     }
 
     updateValueInInput() {
-        // this.input.value = this.datePlaceHolder
         this.input.value = this.datePlaceHolder.map((d, index) => this.replaceMissingPartByPlaceHolder(this.partSelected[index], d)).join(this.separatorPlaceHolder);
-        // this.input.value = `${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.day], this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.month], this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.partSelected[this.indexDate.year], this.yearPlaceHolder)}`
     }
 
     /**
@@ -331,19 +278,16 @@ export class SmartInput {
         let date = this.datePlaceHolder.map((d, index) => this.replaceMissingPartByPlaceHolder(this.partSelected[index], d)).join(this.separatorPlaceHolder);
         for (let i = 0; i < date.length; i++) {
             if (i >= this.input.selectionStart && i < this.input.selectionEnd && date[i] != this.separatorPlaceHolder) {
-                if (i >= this.selectionPosition[this.indexDate.day].start && i < this.selectionPosition[this.indexDate.day].end) {
-                    // this.selectedDay = "";
-                    this.partSelected[this.indexDate.day] = "";
+                if (i >= this.selectionPosition[this.index.day].start && i < this.selectionPosition[this.index.day].end) {
+                    this.partSelected[this.index.day] = "";
                     this.counterInputDay = RESET_COUNTER;
                 }
-                if (i >= this.selectionPosition[this.indexDate.month].start && i < this.selectionPosition[this.indexDate.month].end) {
-                    this.partSelected[this.indexDate.month] = "";
-                    // this.selectedMonth = "";
+                if (i >= this.selectionPosition[this.index.month].start && i < this.selectionPosition[this.index.month].end) {
+                    this.partSelected[this.index.month] = "";
                     this.counterInputMonth = RESET_COUNTER;
                 }
-                if (i >= this.selectionPosition[this.indexDate.year].start && i < this.selectionPosition[this.indexDate.year].end) {
-                    // this.selectedYear = "";
-                    this.partSelected[this.indexDate.year] = "";
+                if (i >= this.selectionPosition[this.index.year].start && i < this.selectionPosition[this.index.year].end) {
+                    this.partSelected[this.index.year] = "";
                     this.counterInputYear = RESET_COUNTER;
                 }
             }
@@ -361,7 +305,6 @@ export class SmartInput {
     }
 
     updateHiddenValue(){
-        // let date = this.datePlaceHolder.
         if (this.input.value == this.datePlaceHolder.join(this.separatorPlaceHolder)) {
             this.hiddenInput.value = "";
         } else {

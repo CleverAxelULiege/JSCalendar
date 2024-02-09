@@ -9,7 +9,7 @@ class CalendarInput {
      * @param {string} separatorPlaceHolder 
      * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "ymd") {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "mdy") {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
