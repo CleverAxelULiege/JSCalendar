@@ -19,7 +19,7 @@ export class SmartInput {
         this.hiddenInput = input.nextElementSibling;
 
 
-        if(!this.hiddenInput || (this.hiddenInput.tagName.toUpperCase() != "INPUT" || this.hiddenInput.getAttribute("type") != "hidden")){
+        if (!this.hiddenInput || (this.hiddenInput.tagName.toUpperCase() != "INPUT" || this.hiddenInput.getAttribute("type") != "hidden")) {
             window.alert("An input tag needs to be added just below the input tel with the type 'hidden'");
         }
 
@@ -44,8 +44,6 @@ export class SmartInput {
         /**@type {(inputValue:string) => void} */
         this.callbackUpdateCalendar = callbackUpdateCalendar;
 
-        this.selectionPosition = -1;
-
         this.selectedDay = "";
         this.counterInputDay = RESET_COUNTER;
 
@@ -54,6 +52,22 @@ export class SmartInput {
 
         this.selectedYear = "";
         this.counterInputYear = RESET_COUNTER;
+
+        /**@type {{start:number, end:number}[]} */
+        this.selectionPosition = new Array(3);
+
+        this.selectionPosition[indexDate.day] = {
+            start: substringPositionDate.day,
+            end: substringPositionDate.day + 2,
+        };
+        this.selectionPosition[indexDate.month] = {
+            start: substringPositionDate.month,
+            end: substringPositionDate.month + 2,
+        };
+        this.selectionPosition[indexDate.year] = {
+            start: substringPositionDate.year,
+            end: substringPositionDate.year + 4,
+        };
 
         this.selection = {
             day: {
@@ -70,15 +84,11 @@ export class SmartInput {
             },
         }
 
-        if(input.value.trim() == ""){
+        if (input.value.trim() == "") {
             this.updateValueInInput();
         }
 
-        if(this.input.value == `${this.dayPlaceHolder}${this.separatorPlaceHolder}${this.monthPlaceHolder}${this.separatorPlaceHolder}${this.yearPlaceHolder}`){
-            this.hiddenInput.value = "";
-        } else {
-            this.hiddenInput.value = this.input.value;
-        }
+        this.updateHiddenValue();
 
         this.initEventListeners();
     }
@@ -96,10 +106,10 @@ export class SmartInput {
     onInput(event) {
         let key = event.key || String.fromCharCode(event.charCode);
 
-        if(key != "Tab"){
+        if (key != "Tab") {
             event.preventDefault();
         }
-        
+
         if (key == "Backspace" || key == "Delete") {
             this.clearDate();
         }
@@ -195,10 +205,12 @@ export class SmartInput {
 
         if (this.counterInputDay > 1) {
             this.counterInputDay = RESET_COUNTER;
-            this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
+            this.input.setSelectionRange(this.selectionPosition[this.indexDate.month].start, this.selectionPosition[this.indexDate.month].end);
+            // this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
             return
         }
-        this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexDate.day].start, this.selectionPosition[this.indexDate.day].end);
+        // this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
     }
 
     inputOnMonth(key) {
@@ -236,10 +248,12 @@ export class SmartInput {
 
         if (this.counterInputMonth > 1) {
             this.counterInputMonth = RESET_COUNTER;
-            this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
+            // this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
+            this.input.setSelectionRange(this.selectionPosition[this.indexDate.year].start, this.selectionPosition[this.indexDate.year].end);
             return
         }
-        this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
+        // this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexDate.month].start, this.selectionPosition[this.indexDate.month].end);
     }
 
     inputOnYear(key) {
@@ -253,7 +267,8 @@ export class SmartInput {
         this.updateValueInInput();
         this.counterInputYear++;
 
-        this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
+        // this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexDate.year].start, this.selectionPosition[this.indexDate.year].end);
         if (this.counterInputYear > 3) {
             this.counterInputYear = RESET_COUNTER;
         }
@@ -279,40 +294,53 @@ export class SmartInput {
     }
 
     clearDate() {
+        console.log(this.partSelected[this.indexDate.year]);
         let date = `${this.replaceMissingPartByPlaceHolder(this.selectedDay, this.dayPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedMonth, this.monthPlaceHolder)}${this.separatorPlaceHolder}${this.replaceMissingPartByPlaceHolder(this.selectedYear, this.yearPlaceHolder)}`;
 
         for (let i = 0; i < date.length; i++) {
             if (i >= this.input.selectionStart && i < this.input.selectionEnd && date[i] != this.separatorPlaceHolder) {
                 if (i >= this.selection.day.start && i < this.selection.day.end) {
-                    this.selectedDay = "";
+                    // this.selectedDay = "";
+                    this.partSelected[this.indexDate.day] = "";
                     this.counterInputDay = RESET_COUNTER;
                 }
                 if (i >= this.selection.month.start && i < this.selection.month.end) {
-                    this.selectedMonth = "";
+                    this.partSelected[this.indexDate.month] = "";
+                    // this.selectedMonth = "";
                     this.counterInputMonth = RESET_COUNTER;
                 }
                 if (i >= this.selection.year.start && i < this.selection.year.end) {
-                    this.selectedYear = "";
+                    // this.selectedYear = "";
+                    this.partSelected[this.indexDate.year] = "";
                     this.counterInputYear = RESET_COUNTER;
                 }
             }
         }
         this.updateValueInInput();
+        this.updateHiddenValue();
+        // if (this.input.value == `${this.dayPlaceHolder}${this.separatorPlaceHolder}${this.monthPlaceHolder}${this.separatorPlaceHolder}${this.yearPlaceHolder}`) {
+        //     this.hiddenInput.value = "";
+        // } else {
+        //     this.hiddenInput.value = this.input.value;
+        // }
 
-        if(this.input.value == `${this.dayPlaceHolder}${this.separatorPlaceHolder}${this.monthPlaceHolder}${this.separatorPlaceHolder}${this.yearPlaceHolder}`){
+        if (this.partSelected[this.indexDate.day] == "") {
+            this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
+        }
+        else if (this.partSelected[this.indexDate.month] == "") {
+            this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
+        }
+        else if (this.partSelected[this.indexDate.year] == "") {
+            this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
+        }
+    }
+
+    updateHiddenValue(){
+        // let date = this.datePlaceHolder.
+        if (this.input.value == this.datePlaceHolder.join(this.separatorPlaceHolder)) {
             this.hiddenInput.value = "";
         } else {
             this.hiddenInput.value = this.input.value;
-        }
-
-        if(this.selectedDay == ""){
-            this.input.setSelectionRange(this.selection.day.start, this.selection.day.end);
-        }
-        else if(this.selectedMonth == ""){
-            this.input.setSelectionRange(this.selection.month.start, this.selection.month.end);
-        }
-        else if(this.selectedYear == ""){
-            this.input.setSelectionRange(this.selection.year.start, this.selection.year.end);
         }
     }
 }
