@@ -9,7 +9,7 @@ class CalendarInput {
      * @param {string} separatorPlaceHolder 
      * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "dmy") {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "ymd") {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
@@ -29,6 +29,13 @@ class CalendarInput {
             year: 0,
         };
         this.setIndexAndPositionSubstring(dateFormat);
+
+        this.datePlaceHolder = new Array(3);
+        this.datePlaceHolder[this.index.day] = dayPlaceHolder;
+        this.datePlaceHolder[this.index.month] = monthPlaceHolder;
+        this.datePlaceHolder[this.index.year] = yearPlaceHolder;
+
+
 
         console.log(this.substringPositionDate);
 
@@ -425,7 +432,9 @@ class CalendarInput {
 
     callBackUpdateCalendar() {
         return (inputValue) => {
-            if (!this.checkIfDateFromInputIsValid(inputValue) && /(\d{2})(.)(\d{2})(.)(\d{4})/.test(inputValue)) {
+            let pattern = `(\\d{${this.datePlaceHolder[0].length}})(.)(\\d{${this.datePlaceHolder[1].length}})(.)(\\d{${this.datePlaceHolder[2].length}})`;
+            let regex = new RegExp(pattern);
+            if (!this.checkIfDateFromInputIsValid(inputValue) && regex.test(inputValue)) {
                 this.invalidDate();
             }
 
