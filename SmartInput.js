@@ -148,6 +148,7 @@ export class SmartInput {
             throw new Error("Day is NaN");
         }
 
+        //si parseDay est supérieur à 3, je fais de l'auto complétion en rajoutant un zéro devant car aucun jour ne peut commencer par un "4". Il n'y a pas de 41ème jours.
         if (parsedDay > 3 && this.partSelected[this.index.day] == "") {
             this.partSelected[this.index.day] = "0" + key;
         } else {
@@ -160,7 +161,6 @@ export class SmartInput {
             //si il y a un input dans la partie du jour et que ce n'est pas au dessus de 31 et en dessous ou égal à 0
             //j'update la partie consacrée au jour
             if (!(this.partSelected[this.index.day] != "" && (parsedDay > 31 || parsedDay <= 0))) {
-                this.counterInputDay++;
                 this.partSelected[this.index.day] = this.partSelected[this.index.day] + key;
             }
 
@@ -174,12 +174,9 @@ export class SmartInput {
             if (this.indexPositionPart < 2) {
                 this.indexPositionPart++;
             }
-            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
-
-            return
         }
-
-        this.input.setSelectionRange(this.selectionPosition[this.index.day].start, this.selectionPosition[this.index.day].end);
+        
+        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
     }
 
     inputOnMonth(key) {
@@ -194,6 +191,7 @@ export class SmartInput {
             throw new Error("Month is NaN");
         }
 
+        //si parsedMonth est supérieur à 1, je fais de l'auto complétion en rajoutant un zéro devant car aucun mois ne peut commencer par un "2". Il n'y a pas de 20ème mois.
         if (parsedMonth > 1 && this.partSelected[this.index.month] == "") {
             this.partSelected[this.index.month] = "0" + key;
         } else {
@@ -217,16 +215,13 @@ export class SmartInput {
 
         if (this.partSelected[this.index.month].length >= 2) {
             this.shouldResetMonthPart = true;
-
+            
             if (this.indexPositionPart < 2) {
                 this.indexPositionPart++;
             }
-
-            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
-            return;
         }
 
-        this.input.setSelectionRange(this.selectionPosition[this.index.month].start, this.selectionPosition[this.index.month].end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
     }
 
     inputOnYear(key) {
@@ -245,10 +240,8 @@ export class SmartInput {
             if (this.indexPositionPart < 2) {
                 this.indexPositionPart++;
             }
-
-            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
-            return
         }
+
         this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
     }
 
@@ -275,15 +268,15 @@ export class SmartInput {
             if (i >= this.input.selectionStart && i < this.input.selectionEnd && date[i] != this.separatorPlaceHolder) {
                 if (i >= this.selectionPosition[this.index.day].start && i < this.selectionPosition[this.index.day].end) {
                     this.partSelected[this.index.day] = "";
-                    this.counterInputDay = RESET_COUNTER;
+                    this.shouldResetDayPart = true;
                 }
                 if (i >= this.selectionPosition[this.index.month].start && i < this.selectionPosition[this.index.month].end) {
                     this.partSelected[this.index.month] = "";
-                    this.counterInputMonth = RESET_COUNTER;
+                    this.shouldResetMonthPart = true;
                 }
                 if (i >= this.selectionPosition[this.index.year].start && i < this.selectionPosition[this.index.year].end) {
                     this.partSelected[this.index.year] = "";
-                    this.counterInputYear = RESET_COUNTER;
+                    this.shouldResetYearPart = true;
                 }
             }
         }

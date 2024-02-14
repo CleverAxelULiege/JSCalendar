@@ -193,19 +193,12 @@ class CalendarInput {
         return new Date(year, month - 1, day);
     }
 
-    /**
-     * Formate la date dd mm yyyy dans l'input
-     */
     setDateInInput() {
         this.date[this.index.year] = this.selectedDate.getFullYear();
         this.date[this.index.month] = this.selectedDate.getMonth() + 1;
         this.date[this.index.day] = this.selectedDate.getDate();
 
         this.inputTxtCalendar.value = this.date.map((d) => d < 10 ? "0" + d.toString() : d.toString()).join(this.separatorPlaceHolder);
-
-        // let month = this.selectedDate.getMonth() + 1;
-        // let day = this.selectedDate.getDate();
-        // this.inputTxtCalendar.value = `${(day < 10 ? "0" + day : day).toString()}${this.separatorPlaceHolder}${(month < 10 ? "0" + month : month).toString()}${this.separatorPlaceHolder}${this.selectedDate.getFullYear().toString()}`;
     }
 
     setSelectedDate(year, month, day) {
