@@ -9,7 +9,8 @@
 <body>
     <div>
 
-        <div class="calendar_input" 
+        <div class="calendar_input"
+        lang="fr"
         data-min-year-selectable="1900" 
         data-set-default-date-if-blank="true" 
         data-day-placeholder="jj" 
@@ -33,34 +34,15 @@
         </div>
     </div>
 </body>
-<script src="./calendar.js" type="module"></script>
 <script>
-    function getLocalDays(){
-        let days = new Array(7);
-        let dateTimeFormat = new Intl.DateTimeFormat("en", {weekday:"short"});
-        let date = new Date(2024, 0, 1);
-        for(let i = 0; i < 7; i++){
-            days[i] = dateTimeFormat.format(date);
-            date.setDate(date.getDate() + 1);
-        }
-        
-        return days;
+    const BUTTONS_CALENDAR = {
+        backToToday : "Back to today",
+        backToSelectedDate : "Revenir à la date sélectionnée",
+        nextMonth : "Mois suivant",
+        nextYear : "Année suivante",
+        prevMonth : "Mois précédent",
+        prevYear : "Année précédente",
     }
-    
-    function getLocalMonthes(){
-        let monthes = new Array(12);
-        let dateTimeFormat = new Intl.DateTimeFormat("en", {month: "long"});
-        let date = new Date(2024, 0, 1);
-        for(let i = 0; i < 12; i++){
-            monthes[i] = dateTimeFormat.format(date);
-            date.setMonth(date.getMonth() + 1);
-        }
-
-        return monthes;
-    }
-    console.log(getLocalDays());
-    console.log(getLocalMonthes());
-    console.log(new Date(2024, 0, 1));
-    // console.log(new Intl.DateTimeFormat("de", {weekday:"long"}).format(new Date()));
 </script>
+<script src="./calendar.js" type="module"></script>
 </html>

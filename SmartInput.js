@@ -129,19 +129,13 @@ export class SmartInput {
         }
 
         if (this.input.selectionStart == this.input.selectionEnd) {
-            if (this.input.selectionStart >= this.selectionPosition[this.index.day].start && this.input.selectionStart <= this.selectionPosition[this.index.day].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.index.day].start, this.selectionPosition[this.index.day].end);
-                this.counterSelectionPosition = this.index.day;
+            for(let i = 0; i < 3; i++){
+                if(this.input.selectionStart >= this.selectionPosition[i].start && this.input.selectionStart <= this.selectionPosition[i].end){
+                    this.input.setSelectionRange(this.selectionPosition[i].start, this.selectionPosition[i].end);
+                    this.counterSelectionPosition = i;
+                    break;
+                }
             }
-            else if (this.input.selectionStart >= this.selectionPosition[this.index.month].start && this.input.selectionStart <= this.selectionPosition[this.index.month].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.index.month].start, this.selectionPosition[this.index.month].end);
-                this.counterSelectionPosition = this.index.month;
-            }
-            else if (this.input.selectionStart >= this.selectionPosition[this.index.year].start && this.input.selectionStart < this.selectionPosition[this.index.year].end) {
-                this.input.setSelectionRange(this.selectionPosition[this.index.year].start, this.selectionPosition[this.index.year].end);
-                this.counterSelectionPosition = this.index.year;
-            }
-            
         }
     }
 

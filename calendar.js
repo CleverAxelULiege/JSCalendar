@@ -1,5 +1,30 @@
 import { SmartInput } from "./SmartInput.js";
 
+/**@type {{backToToday:string, backToSelectedDate:string, nextMonth:string, nextYear:string, prevMonth:string, prevYear:string}} */
+let buttonsCalendar = null;
+
+if (!BUTTONS_CALENDAR) {
+    buttonsCalendar = {
+        backToToday: "Revenir à aujourd'hui",
+        backToSelectedDate: "Revenir à la date sélectionnée",
+        nextMonth: "Mois suivant",
+        nextYear: "Année suivante",
+        prevMonth: "Mois précédent",
+        prevYear: "Année précédente"
+    }
+} else {
+    buttonsCalendar = {
+        backToToday: BUTTONS_CALENDAR.backToToday ? BUTTONS_CALENDAR.backToToday : "Revenir à aujourd'hui",
+        backToSelectedDate: BUTTONS_CALENDAR.backToSelectedDate ? BUTTONS_CALENDAR.backToSelectedDate : "Revenir à la date sélectionnée",
+        nextMonth: BUTTONS_CALENDAR.nextMonth ? BUTTONS_CALENDAR.nextMonth : "Mois suivant",
+        nextYear: BUTTONS_CALENDAR.nextYear ? BUTTONS_CALENDAR.nextYear : "Année suivante",
+        prevMonth: BUTTONS_CALENDAR.prevMonth ? BUTTONS_CALENDAR.prevMonth : "Mois précédent",
+        prevYear: BUTTONS_CALENDAR.prevYear ? BUTTONS_CALENDAR.prevYear : "Année précédente"
+    }
+}
+console.log(buttonsCalendar);
+
+// console.log(BUTTONS_CALENDAR);
 class CalendarInput {
     /**
      * @param {HTMLDivElement} mainSelector 
@@ -7,13 +32,15 @@ class CalendarInput {
      * @param {string} monthPlaceHolder 
      * @param {string} yearPlaceHolder 
      * @param {string} separatorPlaceHolder 
+     * @param {string} local
      * @param {'ymd' | 'dmy' | 'mdy'} dateFormat
      */
-    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, dateFormat = "mdy") {
+    constructor(mainSelector, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, local, dateFormat) {
         this.dayPlaceHolder = dayPlaceHolder;
         this.monthPlaceHolder = monthPlaceHolder;
         this.yearPlaceHolder = yearPlaceHolder;
         this.separatorPlaceHolder = separatorPlaceHolder;
+        this.local = local;
 
         this.index = {
             day: -1,
@@ -37,7 +64,7 @@ class CalendarInput {
 
 
 
-        console.log(this.substringPositionDate);
+        // console.log(this.substringPositionDate);
 
         /**
          * Date d'aujourd'hui, normalement fixe
@@ -235,11 +262,11 @@ class CalendarInput {
         let divNext = document.createElement("div");
         divPrev.classList.add("prev");
         divNext.classList.add("next");
-        divPrev.appendChild(this.createButtonMonthYear("prev_year", `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M493.6 445c-11.2 5.3-24.5 3.6-34.1-4.4L288 297.7V416c0 12.4-7.2 23.7-18.4 29s-24.5 3.6-34.1-4.4L64 297.7V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V96C0 78.3 14.3 64 32 64s32 14.3 32 32V214.3L235.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S288 83.6 288 96V214.3L459.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S512 83.6 512 96V416c0 12.4-7.2 23.7-18.4 29z"/></svg>`));
-        divPrev.appendChild(this.createButtonMonthYear("prev_month", `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>`));
+        divPrev.appendChild(this.createButtonMonthYear("prev_year", buttonsCalendar.prevYear, `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M493.6 445c-11.2 5.3-24.5 3.6-34.1-4.4L288 297.7V416c0 12.4-7.2 23.7-18.4 29s-24.5 3.6-34.1-4.4L64 297.7V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V96C0 78.3 14.3 64 32 64s32 14.3 32 32V214.3L235.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S288 83.6 288 96V214.3L459.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S512 83.6 512 96V416c0 12.4-7.2 23.7-18.4 29z"/></svg>`));
+        divPrev.appendChild(this.createButtonMonthYear("prev_month", buttonsCalendar.prevMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>`));
 
-        divNext.appendChild(this.createButtonMonthYear("next_month", `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>`));
-        divNext.appendChild(this.createButtonMonthYear("next_year", `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M18.4 445c11.2 5.3 24.5 3.6 34.1-4.4L224 297.7V416c0 12.4 7.2 23.7 18.4 29s24.5 3.6 34.1-4.4L448 297.7V416c0 17.7 14.3 32 32 32s32-14.3 32-32V96c0-17.7-14.3-32-32-32s-32 14.3-32 32V214.3L276.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S224 83.6 224 96V214.3L52.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S0 83.6 0 96V416c0 12.4 7.2 23.7 18.4 29z"/></svg>    `));
+        divNext.appendChild(this.createButtonMonthYear("next_month", buttonsCalendar.nextMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>`));
+        divNext.appendChild(this.createButtonMonthYear("next_year", buttonsCalendar.nextYear,`<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M18.4 445c11.2 5.3 24.5 3.6 34.1-4.4L224 297.7V416c0 12.4 7.2 23.7 18.4 29s24.5 3.6 34.1-4.4L448 297.7V416c0 17.7 14.3 32 32 32s32-14.3 32-32V96c0-17.7-14.3-32-32-32s-32 14.3-32 32V214.3L276.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S224 83.6 224 96V214.3L52.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S0 83.6 0 96V416c0 12.4 7.2 23.7 18.4 29z"/></svg>    `));
 
         divContainer.appendChild(divPrev);
         divContainer.appendChild(divNext);
@@ -253,11 +280,11 @@ class CalendarInput {
 
         let divTodaySelectedDate = document.createElement("div");
         divTodaySelectedDate.classList.add("buttons_today_selected_date_container")
-        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate("Revenir à aujourd'hui", () => {
+        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendar.backToToday, () => {
             this.selectedCalendar.setFullYear(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate());
         }));
 
-        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate("Revenir à la date sélectionnée", () => {
+        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendar.backToSelectedDate, () => {
             this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
         }));
         td.appendChild(divContainer);
@@ -283,11 +310,13 @@ class CalendarInput {
     /**
      * Permet de créer un bouton pour avancer d'un mois ou une année
      * @param {string} className 
+     * @param {string} buttonTitle 
      * @param {string} inner 
      * @returns 
      */
-    createButtonMonthYear(className, inner) {
+    createButtonMonthYear(className, buttonTitle, inner) {
         let button = document.createElement("button");
+        button.title = buttonTitle;
         button.classList.add(className);
         button.innerHTML = inner;
 
@@ -309,8 +338,8 @@ class CalendarInput {
         return selectYear;
     }
 
-    createSelectMonth(selectedMonth) {
-        const monthes = [
+    getLocalMonthes() {
+        let monthes = [
             "Janvier",
             "Février",
             "Mars",
@@ -324,6 +353,23 @@ class CalendarInput {
             "Novembre",
             "Décembre"
         ];
+        try {
+            let dateTimeFormat = new Intl.DateTimeFormat(this.local, { month: "long" });
+            let date = new Date(2024, 0, 1);
+            for (let i = 0; i < 12; i++) {
+                monthes[i] = dateTimeFormat.format(date);
+                date.setMonth(date.getMonth() + 1);
+            }
+        } catch (e) {
+            console.log(e);
+            console.warn("Failed to call DateTimeFormat, fallback to the default");
+        }
+
+        return monthes;
+    }
+
+    createSelectMonth(selectedMonth) {
+        const monthes = this.getLocalMonthes();
 
         let selectMonth = document.createElement("select");
         selectMonth.setAttribute("id", "select_month");
@@ -338,18 +384,28 @@ class CalendarInput {
         return selectMonth;
     }
 
+    getLocalDays() {
+        let days = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+        try {
+            let dateTimeFormat = new Intl.DateTimeFormat(this.local, { weekday: "short" });
+            let date = new Date(2024, 0, 1);
+            for (let i = 0; i < 7; i++) {
+                days[i] = dateTimeFormat.format(date).toUpperCase().replace(/\./, "");
+                date.setDate(date.getDate() + 1);
+            }
+        } catch (e) {
+            console.log(e);
+            console.warn("Failed to call DateTimeFormat fallback to default");
+        }
+
+        return days;
+    }
+
     createWeekDaysName() {
-        const days = [
-            "LUN",
-            "MAR",
-            "MER",
-            "JEU",
-            "VEN",
-            "SAM",
-            "DIM"
-        ];
+        const days = this.getLocalDays();
 
         let tr = document.createElement("tr");
+        tr.classList.add("weekdays_name")
         for (let i = 0; i < days.length; i++) {
             let td = document.createElement("td");
             td.innerText = days[i];
@@ -633,9 +689,9 @@ class CalendarInput {
     /**
      * @param {string} dateFormat
      */
-    setIndexAndPositionSubstring(dateFormat){
+    setIndexAndPositionSubstring(dateFormat) {
         dateFormat = dateFormat.toLowerCase();
-        if(!["ymd", "dmy", "mdy"].includes(dateFormat)){
+        if (!["ymd", "dmy", "mdy"].includes(dateFormat)) {
             throw new Error("Possibles values for the date format are : \"ymd\", \"dmy\", \"mdy\"");
         }
 
@@ -660,9 +716,9 @@ class CalendarInput {
                     else if (this.index.year != -1 && this.index.day == -1) {
                         this.substringPositionDate.month = 5;
                     }
-                    else if(this.index.year == -1 && this.index.day != -1){
+                    else if (this.index.year == -1 && this.index.day != -1) {
                         this.substringPositionDate.month = 3;
-                    } 
+                    }
                     else {
                         this.substringPositionDate.month = 8;
                     }
@@ -675,9 +731,9 @@ class CalendarInput {
                     else if (this.index.year != -1 && this.index.month == -1) {
                         this.substringPositionDate.day = 5;
                     }
-                    else if(this.index.year == -1 && this.index.month != -1){
+                    else if (this.index.year == -1 && this.index.month != -1) {
                         this.substringPositionDate.day = 3;
-                    } 
+                    }
                     else {
                         this.substringPositionDate.day = 8;
                     }
@@ -714,13 +770,21 @@ function validatePlaceHolders(day, month, year, separator) {
     }
 }
 
+const DEFAULT_DAY_PLACEHOLDER = "jj";
+const DEFAULT_MONTH_PLACEHOLDER = "mm";
+const DEFAULT_YEAR_PLACEHOLDER = "aaaa";
+const DEFAULT_SEPARATOR_PLACEHOLDER = "/";
+const DEFAULT_LOCAL = "en";
+const DEFAULT_DATE_FORMAT = "dmy";
 document.querySelectorAll(".calendar_input").forEach((calendar) => {
-    let dayPlaceHolder = calendar.getAttribute("data-day-placeholder") ? calendar.getAttribute("data-day-placeholder") : "jj";
-    let monthPlaceHolder = calendar.getAttribute("data-month-placeholder") ? calendar.getAttribute("data-month-placeholder") : "mm";
-    let yearPlaceHolder = calendar.getAttribute("data-year-placeholder") ? calendar.getAttribute("data-year-placeholder") : "aaaa";
-    let separatorPlaceHolder = calendar.getAttribute("data-separator-placeholder") ? calendar.getAttribute("data-separator-placeholder") : "/";
+    let dayPlaceHolder = calendar.getAttribute("data-day-placeholder") ? calendar.getAttribute("data-day-placeholder") : DEFAULT_DAY_PLACEHOLDER;
+    let monthPlaceHolder = calendar.getAttribute("data-month-placeholder") ? calendar.getAttribute("data-month-placeholder") : DEFAULT_MONTH_PLACEHOLDER;
+    let yearPlaceHolder = calendar.getAttribute("data-year-placeholder") ? calendar.getAttribute("data-year-placeholder") : DEFAULT_YEAR_PLACEHOLDER;
+    let separatorPlaceHolder = calendar.getAttribute("data-separator-placeholder") ? calendar.getAttribute("data-separator-placeholder") : DEFAULT_SEPARATOR_PLACEHOLDER;
+    let local = calendar.getAttribute("lang") ? calendar.getAttribute("lang") : document.documentElement.lang ? document.documentElement.lang : DEFAULT_LOCAL;
+    let dateFormat = calendar.getAttribute("data-date-format") ? calendar.getAttribute("data-date-format") : DEFAULT_DATE_FORMAT;
     validatePlaceHolders(dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder);
-    calendarsArray.push(new CalendarInput(calendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder));
+    calendarsArray.push(new CalendarInput(calendar, dayPlaceHolder, monthPlaceHolder, yearPlaceHolder, separatorPlaceHolder, local, dateFormat));
 });
 
 let oldCalendarActive = null;
