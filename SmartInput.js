@@ -30,9 +30,9 @@ export class SmartInput {
         this.datePlaceHolder[index.year] = yearPlaceHolder;
 
         this.partSelected = new Array(3);
-        this.partSelected[index.day] = "";
-        this.partSelected[index.month] = "";
-        this.partSelected[index.year] = "";
+        this.partSelected[index.day] = input.value.trim() == "" ? "" : input.value.substring(substringPositionDate.day, substringPositionDate.day + 2);
+        this.partSelected[index.month] = input.value.trim() == "" ? "" : input.value.substring(substringPositionDate.month, substringPositionDate.month + 2);
+        this.partSelected[index.year] = input.value.trim() == "" ? "" : input.value.substring(substringPositionDate.year, substringPositionDate.year + 4);
 
         this.separatorPlaceHolder = separatorPlaceHolder;
 

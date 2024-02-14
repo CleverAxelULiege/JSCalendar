@@ -62,10 +62,6 @@ class CalendarInput {
         this.datePlaceHolder[this.index.month] = monthPlaceHolder;
         this.datePlaceHolder[this.index.year] = yearPlaceHolder;
 
-
-
-        // console.log(this.substringPositionDate);
-
         /**
          * Date d'aujourd'hui, normalement fixe
          * @type {Date}
