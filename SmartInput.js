@@ -1,5 +1,3 @@
-const RESET_COUNTER = -1;
-
 export class SmartInput {
     /**
      * @param {HTMLInputElement} input 
@@ -41,10 +39,10 @@ export class SmartInput {
         /**@type {(inputValue:string) => void} */
         this.callbackUpdateCalendar = callbackUpdateCalendar;
 
-        this.counterInputDay = RESET_COUNTER;
-        this.counterInputMonth = RESET_COUNTER;
-        this.counterInputYear = RESET_COUNTER;
-        this.counterSelectionPosition = 0;
+        this.shouldResetDayPart = true;
+        this.shouldResetMonthPart = true;
+        this.shouldResetYearPart = true;
+        this.indexPositionPart = 0;
 
         /**@type {{start:number, end:number}[]} */
         this.selectionPosition = new Array(3);
@@ -88,18 +86,17 @@ export class SmartInput {
         }
 
         if (key == "ArrowRight") {
-            if(this.counterSelectionPosition < 2){
-                this.counterSelectionPosition++;
-                this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
+            if (this.indexPositionPart < 2) {
+                this.indexPositionPart++;
+                this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
             }
         }
 
         if (key == "ArrowLeft") {
-            if(this.counterSelectionPosition > 0){
-                this.counterSelectionPosition--;
-                this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
+            if (this.indexPositionPart > 0) {
+                this.indexPositionPart--;
+                this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
             }
-            return;
         }
 
         if (/^\d$/.test(key)) {
@@ -124,15 +121,15 @@ export class SmartInput {
     onClick(e) {
         if (this.input.selectionStart == 10) {
             this.input.setSelectionRange(this.selectionPosition[0].start, this.selectionPosition[0].end);
-            this.counterSelectionPosition = 0;
+            this.indexPositionPart = 0;
             return;
         }
 
         if (this.input.selectionStart == this.input.selectionEnd) {
-            for(let i = 0; i < 3; i++){
-                if(this.input.selectionStart >= this.selectionPosition[i].start && this.input.selectionStart <= this.selectionPosition[i].end){
+            for (let i = 0; i < 3; i++) {
+                if (this.input.selectionStart >= this.selectionPosition[i].start && this.input.selectionStart <= this.selectionPosition[i].end) {
                     this.input.setSelectionRange(this.selectionPosition[i].start, this.selectionPosition[i].end);
-                    this.counterSelectionPosition = i;
+                    this.indexPositionPart = i;
                     break;
                 }
             }
@@ -140,8 +137,8 @@ export class SmartInput {
     }
 
     inputOnDay(key) {
-        if (this.counterInputDay == RESET_COUNTER) {
-            this.counterInputDay = 0;
+        if (this.shouldResetDayPart) {
+            this.shouldResetDayPart = false;
             this.partSelected[this.index.day] = "";
         }
 
@@ -153,7 +150,6 @@ export class SmartInput {
 
         if (parsedDay > 3 && this.partSelected[this.index.day] == "") {
             this.partSelected[this.index.day] = "0" + key;
-            this.counterInputDay = 10;
         } else {
             parsedDay = parseInt(this.partSelected[this.index.day] + key);
 
@@ -161,23 +157,24 @@ export class SmartInput {
                 throw new Error("Day is NaN");
             }
 
-            if (this.partSelected[this.index.day] != "" && (parsedDay > 31 || parsedDay <= 0)) {
-                return;
+            //si il y a un input dans la partie du jour et que ce n'est pas au dessus de 31 et en dessous ou égal à 0
+            //j'update la partie consacrée au jour
+            if (!(this.partSelected[this.index.day] != "" && (parsedDay > 31 || parsedDay <= 0))) {
+                this.counterInputDay++;
+                this.partSelected[this.index.day] = this.partSelected[this.index.day] + key;
             }
 
-            this.counterInputDay++;
-            this.partSelected[this.index.day] = this.partSelected[this.index.day] + key;
         }
 
         this.updateValueInInput();
 
-        if (this.counterInputDay > 1) {
-            this.counterInputDay = RESET_COUNTER;
+        if (this.partSelected[this.index.day].length >= 2) {
+            this.shouldResetDayPart = true;
 
-            if(this.counterSelectionPosition < 2){
-                this.counterSelectionPosition++;
+            if (this.indexPositionPart < 2) {
+                this.indexPositionPart++;
             }
-            this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
+            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
 
             return
         }
@@ -186,8 +183,8 @@ export class SmartInput {
     }
 
     inputOnMonth(key) {
-        if (this.counterInputMonth == RESET_COUNTER) {
-            this.counterInputMonth = 0;
+        if (this.shouldResetMonthPart) {
+            this.shouldResetMonthPart = false;
             this.partSelected[this.index.month] = "";
         }
 
@@ -199,7 +196,6 @@ export class SmartInput {
 
         if (parsedMonth > 1 && this.partSelected[this.index.month] == "") {
             this.partSelected[this.index.month] = "0" + key;
-            this.counterInputMonth = 10;
         } else {
 
             parsedMonth = parseInt(this.partSelected[this.index.month] + key);
@@ -208,47 +204,52 @@ export class SmartInput {
                 throw new Error("Month is NaN");
             }
 
-            if (this.partSelected[this.index.month] != "" && (parsedMonth > 12 || parsedMonth <= 0)) {
-                return;
+            //si il y a un input dans la partie du mois et que ce n'est pas au dessus de 12 et en dessous ou égal à 0
+            //j'update la partie consacrée au mois.
+            if (!(this.partSelected[this.index.month] != "" && (parsedMonth > 12 || parsedMonth <= 0))) {
+                this.partSelected[this.index.month] = this.partSelected[this.index.month] + key;
+                this.counterInputMonth++;
             }
 
-            this.partSelected[this.index.month] = this.partSelected[this.index.month] + key;
-            this.counterInputMonth++;
         }
 
         this.updateValueInInput();
 
-        if (this.counterInputMonth > 1) {
-            this.counterInputMonth = RESET_COUNTER;
-            if(this.counterSelectionPosition < 2){
-                this.counterSelectionPosition++;
+        if (this.partSelected[this.index.month].length >= 2) {
+            this.shouldResetMonthPart = true;
+
+            if (this.indexPositionPart < 2) {
+                this.indexPositionPart++;
             }
-            this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
-            return
+
+            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+            return;
         }
+
         this.input.setSelectionRange(this.selectionPosition[this.index.month].start, this.selectionPosition[this.index.month].end);
     }
 
     inputOnYear(key) {
-        if (this.counterInputYear == RESET_COUNTER) {
-            this.counterInputYear = 0;
+        if (this.shouldResetYearPart) {
+            this.shouldResetYearPart = false;
             this.partSelected[this.index.year] = "";
         }
 
         this.partSelected[this.index.year] = this.partSelected[this.index.year] + key;
 
         this.updateValueInInput();
-        this.counterInputYear++;
 
-        if (this.counterInputYear > 3) {
-            this.counterInputYear = RESET_COUNTER;
-            if(this.counterSelectionPosition < 2){
-                this.counterSelectionPosition++;
+        if (this.partSelected[this.index.year].length >= 4) {
+            this.shouldResetYearPart = true;
+
+            if (this.indexPositionPart < 2) {
+                this.indexPositionPart++;
             }
-            this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
+
+            this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
             return
         }
-        this.input.setSelectionRange(this.selectionPosition[this.counterSelectionPosition].start, this.selectionPosition[this.counterSelectionPosition].end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
     }
 
     updateValueInInput() {
@@ -289,16 +290,16 @@ export class SmartInput {
         this.updateValueInInput();
         this.updateHiddenValue();
 
-        for(let i = 0; i < 3; i++){
-            if(this.partSelected[i] == ""){
+        for (let i = 0; i < 3; i++) {
+            if (this.partSelected[i] == "") {
                 this.input.setSelectionRange(this.selectionPosition[i].start, this.selectionPosition[i].end);
-                this.counterSelectionPosition = i;
+                this.indexPositionPart = i;
                 break;
             }
         }
     }
 
-    updateHiddenValue(){
+    updateHiddenValue() {
         if (this.input.value == this.datePlaceHolder.join(this.separatorPlaceHolder)) {
             this.hiddenInput.value = "";
         } else {
