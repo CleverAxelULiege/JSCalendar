@@ -80,6 +80,12 @@ class CalendarInput {
         this.maxYearSelectable = mainSelector.getAttribute("data-max-year-selectable") ? parseInt(mainSelector.getAttribute("data-max-year-selectable")) : this.todayDate.getFullYear();
         this.minYearSelectable = mainSelector.getAttribute("data-min-year-selectable") ? parseInt(mainSelector.getAttribute("data-min-year-selectable")) : 1900;
 
+        if(isNaN(this.maxYearSelectable)){
+            throw new Error("data-max-year-selectable is NaN");
+        }
+        if(isNaN(this.minYearSelectable)){
+            throw new Error("data-min-year-selectable is NaN");
+        }
 
         /**
          * Le calendrier sélectionné quand l'on change de mois/année sans toucher à selectedDate
