@@ -94,6 +94,7 @@ body {
 .calendar_input .calendar .buttons_today_selected_date_container {
     align-items: stretch;
     display: flex;
+    min-height: 38px;
 }
 
 .calendar_input .calendar .buttons_today_selected_date_container>button {

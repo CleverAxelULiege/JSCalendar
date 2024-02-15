@@ -1,30 +1,6 @@
 import { SmartInput } from "./SmartInput.js";
+import { BUTTONS_CALENDAR } from "./traductions/en.js";
 
-/**@type {{backToToday:string, backToSelectedDate:string, nextMonth:string, nextYear:string, prevMonth:string, prevYear:string}} */
-let buttonsCalendar = null;
-
-if (!BUTTONS_CALENDAR) {
-    buttonsCalendar = {
-        backToToday: "Revenir à aujourd'hui",
-        backToSelectedDate: "Revenir à la date sélectionnée",
-        nextMonth: "Mois suivant",
-        nextYear: "Année suivante",
-        prevMonth: "Mois précédent",
-        prevYear: "Année précédente"
-    }
-} else {
-    buttonsCalendar = {
-        backToToday: BUTTONS_CALENDAR.backToToday ? BUTTONS_CALENDAR.backToToday : "Revenir à aujourd'hui",
-        backToSelectedDate: BUTTONS_CALENDAR.backToSelectedDate ? BUTTONS_CALENDAR.backToSelectedDate : "Revenir à la date sélectionnée",
-        nextMonth: BUTTONS_CALENDAR.nextMonth ? BUTTONS_CALENDAR.nextMonth : "Mois suivant",
-        nextYear: BUTTONS_CALENDAR.nextYear ? BUTTONS_CALENDAR.nextYear : "Année suivante",
-        prevMonth: BUTTONS_CALENDAR.prevMonth ? BUTTONS_CALENDAR.prevMonth : "Mois précédent",
-        prevYear: BUTTONS_CALENDAR.prevYear ? BUTTONS_CALENDAR.prevYear : "Année précédente"
-    }
-}
-console.log(buttonsCalendar);
-
-// console.log(BUTTONS_CALENDAR);
 class CalendarInput {
     /**
      * @param {HTMLDivElement} mainSelector 
@@ -111,10 +87,12 @@ class CalendarInput {
          */
         this.selectedCalendar = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), 1);
 
-        this.createBaseCalendar();
-        this.addEventListenerToSelects();
-        this.addEventListenerToButtonsInsideCalendar();
-        this.addEventListenerToButtonToggle();
+        this.createBaseCalendar().then(() => {
+            this.addEventListenerToSelects();
+            this.addEventListenerToButtonsInsideCalendar();
+            this.addEventListenerToButtonToggle();
+            this.updateCalendarAndSetNewMonth();
+        });
 
         this.inputTxtCalendar.addEventListener("blur", () => {
             //nextElementSibling doit être l'input hidden.
@@ -125,7 +103,6 @@ class CalendarInput {
             }
         });
 
-        this.updateCalendarAndSetNewMonth();
 
     }
 
@@ -222,21 +199,35 @@ class CalendarInput {
      * Ou des select pour choisir l'année précise/mois précis.
      * C'est ici aussi que l'on crée les labels des jours de la semaine
      *******************************************************/
-    createBaseCalendar() {
+    async createBaseCalendar() {
+        /**@type {{backToToday:string, backToSelectedDate:string, nextMonth:string, nextYear:string, prevMonth:string, prevYear:string}} */
+        let buttonsCalendar = null;
+        try{
+            let importTrad = await import(`./traductions/${this.local}.js`);
+            buttonsCalendar = importTrad.BUTTONS_CALENDAR;
+        } catch{
+            console.warn("Failed to dynamically import traduction fallback to the default");
+            buttonsCalendar = BUTTONS_CALENDAR;
+        }
+
         let table = document.createElement("table");
         table.classList.add("calendar")
         table.style.display = "none";
 
         let tbody = document.createElement("tbody");
-        tbody.appendChild(this.createSelectMonthYear());
+        tbody.appendChild(this.createSelectMonthYear(buttonsCalendar));
         tbody.appendChild(this.createWeekDaysName());
 
         table.appendChild(tbody);
         this.mainSelector.appendChild(table);
 
     }
-
-    createSelectMonthYear() {
+    /**
+     * 
+     * @param {{backToToday:string, backToSelectedDate:string, nextMonth:string, nextYear:string, prevMonth:string, prevYear:string}} buttonsCalendarTraduction 
+     * @returns 
+     */
+    createSelectMonthYear(buttonsCalendarTraduction) {
         let tr = document.createElement("tr")
         tr.classList.add("month_year_container")
         let td = document.createElement("td");
@@ -251,11 +242,11 @@ class CalendarInput {
         let divNext = document.createElement("div");
         divPrev.classList.add("prev");
         divNext.classList.add("next");
-        divPrev.appendChild(this.createButtonMonthYear("prev_year", buttonsCalendar.prevYear, `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M493.6 445c-11.2 5.3-24.5 3.6-34.1-4.4L288 297.7V416c0 12.4-7.2 23.7-18.4 29s-24.5 3.6-34.1-4.4L64 297.7V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V96C0 78.3 14.3 64 32 64s32 14.3 32 32V214.3L235.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S288 83.6 288 96V214.3L459.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S512 83.6 512 96V416c0 12.4-7.2 23.7-18.4 29z"/></svg>`));
-        divPrev.appendChild(this.createButtonMonthYear("prev_month", buttonsCalendar.prevMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>`));
+        divPrev.appendChild(this.createButtonMonthYear("prev_year", buttonsCalendarTraduction.prevYear, `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M493.6 445c-11.2 5.3-24.5 3.6-34.1-4.4L288 297.7V416c0 12.4-7.2 23.7-18.4 29s-24.5 3.6-34.1-4.4L64 297.7V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V96C0 78.3 14.3 64 32 64s32 14.3 32 32V214.3L235.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S288 83.6 288 96V214.3L459.5 71.4c9.5-7.9 22.8-9.7 34.1-4.4S512 83.6 512 96V416c0 12.4-7.2 23.7-18.4 29z"/></svg>`));
+        divPrev.appendChild(this.createButtonMonthYear("prev_month", buttonsCalendarTraduction.prevMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>`));
 
-        divNext.appendChild(this.createButtonMonthYear("next_month", buttonsCalendar.nextMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>`));
-        divNext.appendChild(this.createButtonMonthYear("next_year", buttonsCalendar.nextYear,`<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M18.4 445c11.2 5.3 24.5 3.6 34.1-4.4L224 297.7V416c0 12.4 7.2 23.7 18.4 29s24.5 3.6 34.1-4.4L448 297.7V416c0 17.7 14.3 32 32 32s32-14.3 32-32V96c0-17.7-14.3-32-32-32s-32 14.3-32 32V214.3L276.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S224 83.6 224 96V214.3L52.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S0 83.6 0 96V416c0 12.4 7.2 23.7 18.4 29z"/></svg>    `));
+        divNext.appendChild(this.createButtonMonthYear("next_month", buttonsCalendarTraduction.nextMonth, `<svg width="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>`));
+        divNext.appendChild(this.createButtonMonthYear("next_year", buttonsCalendarTraduction.nextYear, `<svg width="22" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M18.4 445c11.2 5.3 24.5 3.6 34.1-4.4L224 297.7V416c0 12.4 7.2 23.7 18.4 29s24.5 3.6 34.1-4.4L448 297.7V416c0 17.7 14.3 32 32 32s32-14.3 32-32V96c0-17.7-14.3-32-32-32s-32 14.3-32 32V214.3L276.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S224 83.6 224 96V214.3L52.5 71.4c-9.5-7.9-22.8-9.7-34.1-4.4S0 83.6 0 96V416c0 12.4 7.2 23.7 18.4 29z"/></svg>    `));
 
         divContainer.appendChild(divPrev);
         divContainer.appendChild(divNext);
@@ -269,11 +260,11 @@ class CalendarInput {
 
         let divTodaySelectedDate = document.createElement("div");
         divTodaySelectedDate.classList.add("buttons_today_selected_date_container")
-        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendar.backToToday, () => {
+        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendarTraduction.backToToday, () => {
             this.selectedCalendar.setFullYear(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate());
         }));
 
-        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendar.backToSelectedDate, () => {
+        divTodaySelectedDate.appendChild(this.createButtonTodaySelectedDate(buttonsCalendarTraduction.backToSelectedDate, () => {
             this.selectedCalendar.setFullYear(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
         }));
         td.appendChild(divContainer);
@@ -376,13 +367,13 @@ class CalendarInput {
     getLocalDays() {
         /**@type {{short:string, long:string}[]} */
         let days = [
-            {short: "MON", long: "Monday"},
-            {short: "TUE", long: "Tuesday"},
-            {short: "WED", long: "Wednesday"},
-            {short: "THU", long: "Thursday"},
-            {short: "FRI", long: "Friday"},
-            {short: "SAT", long: "Saturday"},
-            {short: "SUN", long: "Sunday"},
+            { short: "MON", long: "Monday" },
+            { short: "TUE", long: "Tuesday" },
+            { short: "WED", long: "Wednesday" },
+            { short: "THU", long: "Thursday" },
+            { short: "FRI", long: "Friday" },
+            { short: "SAT", long: "Saturday" },
+            { short: "SUN", long: "Sunday" },
         ];
 
         try {
