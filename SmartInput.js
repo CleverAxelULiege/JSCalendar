@@ -24,11 +24,13 @@ export class SmartInput {
         /**@type {{day:number, month:number, year:number}} */
         this.index = index;
 
+        /**@type {string[]} */
         this.datePlaceHolder = new Array(3);
         this.datePlaceHolder[index.day] = dayPlaceHolder;
         this.datePlaceHolder[index.month] = monthPlaceHolder;
         this.datePlaceHolder[index.year] = yearPlaceHolder;
 
+        /**@type {string[]} */
         this.partSelected = new Array(3);
         this.partSelected[index.day] = input.value.trim() == "" ? "" : input.value.substring(substringPositionDate.day, substringPositionDate.day + 2);
         this.partSelected[index.month] = input.value.trim() == "" ? "" : input.value.substring(substringPositionDate.month, substringPositionDate.month + 2);
@@ -42,7 +44,7 @@ export class SmartInput {
         this.shouldResetDayPart = true;
         this.shouldResetMonthPart = true;
         this.shouldResetYearPart = true;
-        this.indexPositionPart = 0;
+        this.indexPartPosition = 0;
 
         /**@type {{start:number, end:number}[]} */
         this.selectionPosition = new Array(3);
@@ -60,6 +62,7 @@ export class SmartInput {
             end: substringPositionDate.year + 4,
         };
 
+        //si vide mets le "faux" placeholder en place
         if (input.value.trim() == "") {
             this.updateValueInInput();
         }
@@ -86,16 +89,16 @@ export class SmartInput {
         }
 
         if (key == "ArrowRight") {
-            if (this.indexPositionPart < 2) {
-                this.indexPositionPart++;
-                this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+            if (this.indexPartPosition < 2) {
+                this.indexPartPosition++;
+                this.input.setSelectionRange(this.selectionPosition[this.indexPartPosition].start, this.selectionPosition[this.indexPartPosition].end);
             }
         }
 
         if (key == "ArrowLeft") {
-            if (this.indexPositionPart > 0) {
-                this.indexPositionPart--;
-                this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+            if (this.indexPartPosition > 0) {
+                this.indexPartPosition--;
+                this.input.setSelectionRange(this.selectionPosition[this.indexPartPosition].start, this.selectionPosition[this.indexPartPosition].end);
             }
         }
 
@@ -121,7 +124,7 @@ export class SmartInput {
     onClick(e) {
         if (this.input.selectionStart == 10) {
             this.input.setSelectionRange(this.selectionPosition[0].start, this.selectionPosition[0].end);
-            this.indexPositionPart = 0;
+            this.indexPartPosition = 0;
             return;
         }
 
@@ -129,7 +132,7 @@ export class SmartInput {
             for (let i = 0; i < 3; i++) {
                 if (this.input.selectionStart >= this.selectionPosition[i].start && this.input.selectionStart <= this.selectionPosition[i].end) {
                     this.input.setSelectionRange(this.selectionPosition[i].start, this.selectionPosition[i].end);
-                    this.indexPositionPart = i;
+                    this.indexPartPosition = i;
                     break;
                 }
             }
@@ -171,12 +174,12 @@ export class SmartInput {
         if (this.partSelected[this.index.day].length >= 2) {
             this.shouldResetDayPart = true;
 
-            if (this.indexPositionPart < 2) {
-                this.indexPositionPart++;
+            if (this.indexPartPosition < 2) {
+                this.indexPartPosition++;
             }
         }
         
-        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexPartPosition].start, this.selectionPosition[this.indexPartPosition].end);
     }
 
     inputOnMonth(key) {
@@ -216,12 +219,12 @@ export class SmartInput {
         if (this.partSelected[this.index.month].length >= 2) {
             this.shouldResetMonthPart = true;
             
-            if (this.indexPositionPart < 2) {
-                this.indexPositionPart++;
+            if (this.indexPartPosition < 2) {
+                this.indexPartPosition++;
             }
         }
 
-        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexPartPosition].start, this.selectionPosition[this.indexPartPosition].end);
     }
 
     inputOnYear(key) {
@@ -237,12 +240,12 @@ export class SmartInput {
         if (this.partSelected[this.index.year].length >= 4) {
             this.shouldResetYearPart = true;
 
-            if (this.indexPositionPart < 2) {
-                this.indexPositionPart++;
+            if (this.indexPartPosition < 2) {
+                this.indexPartPosition++;
             }
         }
 
-        this.input.setSelectionRange(this.selectionPosition[this.indexPositionPart].start, this.selectionPosition[this.indexPositionPart].end);
+        this.input.setSelectionRange(this.selectionPosition[this.indexPartPosition].start, this.selectionPosition[this.indexPartPosition].end);
     }
 
     updateValueInInput() {
@@ -286,7 +289,7 @@ export class SmartInput {
         for (let i = 0; i < 3; i++) {
             if (this.partSelected[i] == "") {
                 this.input.setSelectionRange(this.selectionPosition[i].start, this.selectionPosition[i].end);
-                this.indexPositionPart = i;
+                this.indexPartPosition = i;
                 break;
             }
         }

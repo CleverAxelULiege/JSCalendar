@@ -329,18 +329,18 @@ class CalendarInput {
 
     getLocalMonthes() {
         let monthes = [
-            "Janvier",
-            "Février",
-            "Mars",
-            "Avril",
-            "Mai",
-            "Juin",
-            "Juillet",
-            "Août",
-            "Septembre",
-            "Octobre",
-            "Novembre",
-            "Décembre"
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
         ];
         try {
             let dateTimeFormat = new Intl.DateTimeFormat(this.local, { month: "long" });
@@ -374,12 +374,24 @@ class CalendarInput {
     }
 
     getLocalDays() {
-        let days = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+        /**@type {{short:string, long:string}[]} */
+        let days = [
+            {short: "MON", long: "Monday"},
+            {short: "TUE", long: "Tuesday"},
+            {short: "WED", long: "Wednesday"},
+            {short: "THU", long: "Thursday"},
+            {short: "FRI", long: "Friday"},
+            {short: "SAT", long: "Saturday"},
+            {short: "SUN", long: "Sunday"},
+        ];
+
         try {
-            let dateTimeFormat = new Intl.DateTimeFormat(this.local, { weekday: "short" });
+            let dateTimeFormatShort = new Intl.DateTimeFormat(this.local, { weekday: "short" });
+            let dateTimeFormatLong = new Intl.DateTimeFormat(this.local, { weekday: "long" });
             let date = new Date(2024, 0, 1);
             for (let i = 0; i < 7; i++) {
-                days[i] = dateTimeFormat.format(date).toUpperCase().replace(/\./, "");
+                days[i].short = dateTimeFormatShort.format(date).toUpperCase().replace(/\./, "");
+                days[i].long = dateTimeFormatLong.format(date).replace(/\./, "");
                 date.setDate(date.getDate() + 1);
             }
         } catch (e) {
@@ -397,7 +409,8 @@ class CalendarInput {
         tr.classList.add("weekdays_name")
         for (let i = 0; i < days.length; i++) {
             let td = document.createElement("td");
-            td.innerText = days[i];
+            td.innerText = days[i].short;
+            td.title = days[i].long;
             tr.appendChild(td);
         }
 
@@ -759,12 +772,12 @@ function validatePlaceHolders(day, month, year, separator) {
     }
 }
 
-const DEFAULT_DAY_PLACEHOLDER = "jj";
+const DEFAULT_DAY_PLACEHOLDER = "dd";
 const DEFAULT_MONTH_PLACEHOLDER = "mm";
-const DEFAULT_YEAR_PLACEHOLDER = "aaaa";
-const DEFAULT_SEPARATOR_PLACEHOLDER = "/";
+const DEFAULT_YEAR_PLACEHOLDER = "yyyy";
+const DEFAULT_SEPARATOR_PLACEHOLDER = "-";
 const DEFAULT_LOCAL = "en";
-const DEFAULT_DATE_FORMAT = "dmy";
+const DEFAULT_DATE_FORMAT = "ymd";
 document.querySelectorAll(".calendar_input").forEach((calendar) => {
     let dayPlaceHolder = calendar.getAttribute("data-day-placeholder") ? calendar.getAttribute("data-day-placeholder") : DEFAULT_DAY_PLACEHOLDER;
     let monthPlaceHolder = calendar.getAttribute("data-month-placeholder") ? calendar.getAttribute("data-month-placeholder") : DEFAULT_MONTH_PLACEHOLDER;
